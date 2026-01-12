@@ -5,15 +5,15 @@
       xmlns:dc="http://purl.org/dc/elements/1.1/" 
       version="2.0">
 <channel>
-<title>my-tech-notebook</title>
+<title>Machine Learning and AI Notes</title>
 <link>https://sunhk7.github.io/</link>
 <atom:link href="https://sunhk7.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog built with Quarto</description>
 <generator>quarto-1.8.26</generator>
-<lastBuildDate>Fri, 09 Jan 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 08 Jan 2026 16:00:00 GMT</lastBuildDate>
 <item>
   <title>Diffusion Model</title>
-  <dc:creator>Yuyang </dc:creator>
+  <dc:creator>sunhk7 </dc:creator>
   <link>https://sunhk7.github.io/posts/diffusion-model/</link>
   <description><![CDATA[ 
 
@@ -542,9 +542,9 @@ Sohl-Dickstein, Jascha, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 
 </div>
 </div></section></div> ]]></description>
   <category>Deep Learning</category>
-  <category>Math</category>
+  <category>AI</category>
   <guid>https://sunhk7.github.io/posts/diffusion-model/</guid>
-  <pubDate>Fri, 09 Jan 2026 00:00:00 GMT</pubDate>
+  <pubDate>Thu, 08 Jan 2026 16:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
