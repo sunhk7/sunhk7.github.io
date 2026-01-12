@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>my-tech-notebook</title>
+<link>https://your-website-url.example.com/</link>
+<atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
+<description>A blog built with Quarto</description>
+<generator>quarto-1.8.26</generator>
+<lastBuildDate>Thu, 08 Jan 2026 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Diffusion Model</title>
+  <dc:creator>Yuyang </dc:creator>
+  <link>https://your-website-url.example.com/posts/diffusion-model/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="diffusion-models" class="level1">
+<h1>Diffusion Models</h1>
+<section id="what-is-diffusion-model" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-diffusion-model">What is Diffusion Model?</h2>
+<p>Diffusion models are a class of image generative neural networks inspired by and formulated as a simulation of the thermodynamic diffusion process. The core idea is to model the data generation process as a gradual denoising process, where a neural network learns to reverse a diffusion process that progressively adds noise to the data until it becomes pure noise. By learning this reverse process, the model can generate new data samples from random noise.</p>
+</section>
+<section id="sde-stochastic-differential-equations" class="level2">
+<h2 class="anchored" data-anchor-id="sde-stochastic-differential-equations">SDE: Stochastic Differential Equations</h2>
+<p>Diffusion models can be mathematically described using Stochastic Differential Equations (SDEs). <span class="citation" data-cites="SohlDickstein2015DeepUL">J. N. Sohl-Dickstein et al. (2015)</span> introduced the concept of diffusion probabilistic models, which can be viewed as a discrete-time approximation of continuous-time SDEs.</p>
+<p>A stochastic differential equation (SDE) in one-dimensional space can be expressed as: <img src="https://latex.codecogs.com/png.latex?dx%20=%20f(x,%20t)dt%20+%20g(t)dW_t%20%5Cquad%20dW_t%20%5Csim%20%5Cmathcal%7BN%7D(0,%20dt)"> where: - <img src="https://latex.codecogs.com/png.latex?x"> is the state variable (e.g., pixel values of an image). - <img src="https://latex.codecogs.com/png.latex?t"> is time. - <img src="https://latex.codecogs.com/png.latex?f(x,%20t)"> is the drift coefficient, representing the deterministic part of the evolution of <img src="https://latex.codecogs.com/png.latex?x"> over time. - <img src="https://latex.codecogs.com/png.latex?g(t)"> is the diffusion coefficient, representing the stochastic part of the evolution. - <img src="https://latex.codecogs.com/png.latex?dW_t"> is the increment of a Wiener process (or Brownian motion), which introduces randomness into the system.</p>
+<p>The equation describes how the state variable <img src="https://latex.codecogs.com/png.latex?x"> evolves over time under the influence of both deterministic and stochastic components. The drift term <img src="https://latex.codecogs.com/png.latex?f(x,%20t)dt"> captures the systematic changes in <img src="https://latex.codecogs.com/png.latex?x">, while the diffusion term <img src="https://latex.codecogs.com/png.latex?g(t)dW_t"> captures the random fluctuations.</p>
+<p>It is worth noting that when the deterministic component <img src="https://latex.codecogs.com/png.latex?f(x,t)"> is negatively correlated with the position variable <img src="https://latex.codecogs.com/png.latex?x">, the value of <img src="https://latex.codecogs.com/png.latex?x"> will gradually move toward the origin as time progresses. Meanwhile, due to the presence of the stochastic term, <img src="https://latex.codecogs.com/png.latex?x"> will eventually undergo random motion around the origin, following a Gaussian distribution.</p>
+</section>
+<section id="from-sde-to-diffusion-models" class="level2">
+<h2 class="anchored" data-anchor-id="from-sde-to-diffusion-models">From SDE to Diffusion Models</h2>
+<p>In diffusion models, the forward diffusion process can be described by a specific type of SDE. The SDE is defined as: <img src="https://latex.codecogs.com/png.latex?dx%20=%20-%5Cfrac%7B1%7D%7B2%7D%5Cbeta(t)xdt%20+%20%5Csqrt%7B%5Cbeta(t)%7DdW_t%5Cquad%20dW_t%20%5Csim%20%5Cmathcal%7BN%7D(0,%20dt)"> where <img src="https://latex.codecogs.com/png.latex?%5Cbeta(t)"> is a time-dependent function that controls the rate of noise addition over time.</p>
+<p>Since <img src="https://latex.codecogs.com/png.latex?dW_t"> follows a Gaussian distribution, we can discretize the SDE over small time intervals <img src="https://latex.codecogs.com/png.latex?%5CDelta%20t"> to obtain the following discrete-time update equation: <img src="https://latex.codecogs.com/png.latex?x_%7Bt+%5CDelta%20t%7D%20=%20x_t%20-%20%5Cfrac%7B1%7D%7B2%7D%5Cbeta(t)%5Ccdot%20x_t%20%5Ccdot%20dt%20+%20%5Csqrt%7B%5Cbeta(t)%5CDelta%20t%7D%5Cepsilon,%20%5Cquad%20%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)"> where <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_t"> is a standard Gaussian noise term.</p>
+<p>The following formula can be obtained from the Euler approximation and the Taylor expansion. <span id="eq-eq1"><img src="https://latex.codecogs.com/png.latex?%0Ax_i%20=%20%5Csqrt%7B1-%5Cbeta_i%7Dx_%7Bi-1%7D%20+%20%5Csqrt%7B%5Cbeta_i%7D%5Cepsilon_%7Bi-1%7D,%20%5Cquad%20%5Cepsilon_%7Bi-1%7D%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)%0A%5Ctag%7B1%7D"></span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Euler-Maruyama and the Taylor expansion Method
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>pass</p>
+</div>
+</div>
+</div>
+<section id="forward-single-step-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="forward-single-step-diffusion-process">Forward single-step diffusion process</h3>
+<p>Let <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%201%20-%20%5Calpha"> in Equation&nbsp;1. We can then derive the formula for <img src="https://latex.codecogs.com/png.latex?x_i"> corresponding to a given <img src="https://latex.codecogs.com/png.latex?x_%7Bi-1%7D">. Since <img src="https://latex.codecogs.com/png.latex?%5Calpha%20=%20%5B0.99999,%20%5Cdots,%200.999%5D">, at each time step, <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> is scaled by <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B%5Calpha_t%7D"> and some noise is added. Because the noise follows a Gaussian distribution, conditioned on <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D">, <img src="https://latex.codecogs.com/png.latex?x_t"> also follows a Gaussian distribution <img src="https://latex.codecogs.com/png.latex?N">. Then, a random sample from the distribution of <img src="https://latex.codecogs.com/png.latex?x_i"> is used as the input for determining <img src="https://latex.codecogs.com/png.latex?x_%7Bt+1%7D">, and this process is iterated step by step. As a result, at each time step, <img src="https://latex.codecogs.com/png.latex?x_t"> moves closer to the origin. When <img src="https://latex.codecogs.com/png.latex?T"> is sufficiently large, i.e., there are enough time steps, the final <img src="https://latex.codecogs.com/png.latex?x_i"> follows a standard normal distribution: <img src="https://latex.codecogs.com/png.latex?x_t%20%5Csim%20N(0,1)">. <span id="eq-eq2"><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft%5C%7B%0A%5Cbegin%7Baligned%7D%0A%20%20x_t%20=%20%5Csqrt%7B%5Calpha_%7Bt%7D%7D%20%5Ccdot%20x_%7Bt-1%7D%20+%20%5Csqrt%7B%201-%20%5Calpha_%7Bt%7D%7D%20%5Ccdot%20%5Cepsilon_%7Bt-1%7D%20%5C%5C%0A%20%20p(x_t%7Cx_%7Bt-1%7D)%20%5Csim%20%5Cmathcal%7BN%7D(%5Csqrt%7B%5Calpha_%7Bt%7D%7D%20%5Ccdot%20x_%7Bt-1%7D,%201-%20%5Calpha_%7Bt%7D)%0A%5Cend%7Baligned%7D%0A%5Cright.%0A%5Ctag%7B2%7D"></span> where <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">.</p>
+<p><img src="https://your-website-url.example.com/posts/diffusion-model/figures/2015singlestep.png" class="img-fluid"></p>
+</section>
+<section id="multi-step-forward-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="multi-step-forward-diffusion-process">Multi-step forward diffusion process</h3>
+<p>By recursively applying the single-step diffusion process in Equation&nbsp;2, we can derive the multi-step forward diffusion process. Specifically, we can express <img src="https://latex.codecogs.com/png.latex?x_t"> directly in terms of the original data point <img src="https://latex.codecogs.com/png.latex?x_0"> and the accumulated noise over <img src="https://latex.codecogs.com/png.latex?t"> steps. This leads to the following equations: <span id="eq-eq3"><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft%5C%7B%0A%5Cbegin%7Baligned%7D%0A%20%20x_t%20=%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20x_0%20+%20%5Csqrt%7B%201-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20%5Cepsilon_t%20%5C%5C%0A%20%20p(x_t%7Cx_0)%20%5Csim%20%5Cmathcal%7BN%7D(%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20x_0,%201-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D)%0A%5Cend%7Baligned%7D%0A%5Cright.%0A%5Ctag%7B3%7D"></span> where <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">. <img src="https://your-website-url.example.com/posts/diffusion-model/figures/2015multistep.png" class="img-fluid"></p>
+</section>
+<section id="single-step-reverse-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="single-step-reverse-diffusion-process">Single-step reverse diffusion process</h3>
+<p>The reverse diffusion process aims to recover the original data point <img src="https://latex.codecogs.com/png.latex?x_0"> from the noisy observation <img src="https://latex.codecogs.com/png.latex?x_t">. Equation&nbsp;1 gives us the single-step forward diffusion process, but only in the very first step, that is, when <img src="https://latex.codecogs.com/png.latex?x_0"> is considered, <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> is a deterministic value. However, in subsequent steps, <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> is sampled from a probability distribution, and <img src="https://latex.codecogs.com/png.latex?%5Cepsilon"> is also a stochastic value. The computation of <img src="https://latex.codecogs.com/png.latex?x_t"> involves combining these two uncertain values through scaling and addition. A single <img src="https://latex.codecogs.com/png.latex?x_t"> can correspond to infinitely many possible pairs of <img src="https://latex.codecogs.com/png.latex?x_%7Bi-t%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_t">. This means that the neural network would need to learn two uncertain values simultaneously, which is something the network cannot achieve.</p>
+<p>For Equation&nbsp;2, we can derive the reverse process as follows: <img src="https://latex.codecogs.com/png.latex?x_0%20=%20%5Cfrac%7Bx_t%20-%20%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%5Cepsilon_t%7D%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%7D"> Since <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D"> is nearly zero, our network does not have sufficent precision.</p>
+<p>However, if we know the starting point <img src="https://latex.codecogs.com/png.latex?x_0"> and the current point <img src="https://latex.codecogs.com/png.latex?x_t">, the intermediate point <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> becomes a completely determined Gaussian distribution. Its closed-form expression can be derived as follows: <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t,%20x_0)%20=%20%5Cmathcal%7BN%7D%5Cleft(x_%7Bt-1%7D;%20%20%5Ctextcolor%7Bred%7D%7B%5Ctilde%7B%5Cmu%7D_t(x_t,%20x_0)%7D,%20%5Ctextcolor%7Bblue%7D%7B%5Ctilde%7B%5Cbeta%7D_t%20I%7D%5Cright)"> where <span id="eq-eq4"><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Ctextcolor%7Bred%7D%7B%5Ctilde%7B%5Cmu%7D_t(x_t,%20x_0)%7D%20&amp;=%20%5Cfrac%7B%5Csqrt%7B%5Calpha_t%7D(1%20-%20%5Cbar%7B%5Calpha%7D_%7Bt-1%7D)%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%20x_t%20+%20%5Cfrac%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D%5Cbeta_t%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%20x_0%20%5C%5C%0A&amp;=%20%5Cfrac%7B%5Csqrt%7B%5Calpha_t%7D(1%20-%20%5Cbar%7B%5Calpha%7D_%7Bt-1%7D)%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%20x_t%20+%20%5Cfrac%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D%5Cbeta_t%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%20(%5Cfrac%7Bx_t%20-%20%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D%7D%5Cepsilon_t%7D%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_t%7D%7D)%20%5C%5C%0A&amp;=%20%5Ctextcolor%7Bred%7D%7B%5Cfrac%7B1%7D%7B%5Csqrt%7B%5Calpha_t%7D%7D%20%5Cleft(%20x_t%20-%20%5Cfrac%7B1%20-%20%5Calpha_t%7D%7B%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%7D%20%5Cepsilon_t%20%5Cright)%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A%5Ctag%7B4%7D"></span> <span id="eq-eq5"><img src="https://latex.codecogs.com/png.latex?%0A%5Ctextcolor%7Bblue%7D%7B%5Ctilde%7B%5Cbeta%7D_t%7D%20=%20%5Ctextcolor%7Bblue%7D%7B%5Cfrac%7B1%20-%20%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%20%5Cbeta_t%7D%0A%5Ctag%7B5%7D"></span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The derivation of <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cmu%7D_t"> and <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cbeta%7D_t">
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+To derive the expressions for <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cmu%7D_t"> and <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cbeta%7D_t">, we can apply Bayes’ rule.
+<div style="font-size:0.8em; text-align: left">
+<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Baligned%7D%0Aq(x_%7Bt-1%7D%7Cx_t,%20x_0)%20&amp;=%20q(x_t%7Cx_%7Bt-1%7D)%5Cfrac%7Bq(x_%7Bt-1%7D%7Cx_0)%7D%7Bq(x_%7Bt%7D%7Cx_0)%7D%20%5C%5C%0A&amp;%5Cpropto%20%5Cexp%20%5CBig(-%5Cfrac%7B1%7D%7B2%7D(%5Cfrac%7B%5Cleft(x_t%20-%20%5Csqrt%7B%5Calpha_t%7Dx_%7Bt-1%7D%5Cright)%5E2%7D%7B%5Cbeta_t%7D%20+%20%5Cfrac%7B%5Cleft(x_%7Bt-1%7D%20-%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7Dx_0%5Cright)%5E2%7D%7B1-%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D%20-%20%5Cfrac%7B%5Cleft(x_t%20-%20%5Csqrt%7B%5Calpha_t%7Dx_0%5Cright)%5E2%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D)%5CBig)%20%5C%5C%0A&amp;=%20exp%20%5CBig(-%5Cfrac%7B1%7D%7B2%7D%20%5CBig(%20(%5Cfrac%7B%5Calpha_t%7D%7B%5Cbeta_t%7D%20+%20%5Cfrac%7B1%7D%7B1-%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D)x_%7Bt-1%7D%5E2%20-%202(%5Cfrac%7B%5Csqrt%7B%5Calpha_t%7Dx_t%7D%7B%5Cbeta_t%7D%20+%20%5Cfrac%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7Dx_0%7D%7B1-%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D)x_%7Bt-1%7D%20+%20C(x_t,%20x_0)%20%5CBig)%20%5CBig)%20%5C%5C%0A%0A%5Cend%7Baligned%7D">
+</div>
+According the standard form of Gaussian distribution, we can identify the mean and variance as follows:
+<div style="font-size:0.8em; text-align: left">
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Ctextcolor%7Bred%7D%7B%5Ctilde%7B%5Cmu%7D_t(x_t,%20x_0)%7D%20=%20(%5Cfrac%7B%5Csqrt%7B%5Calpha_t%7Dx_t%7D%7B%5Cbeta_t%7D%20+%20%5Cfrac%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7Dx_0%7D%7B1-%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D)/(%5Cfrac%7B%5Calpha_t%7D%7B%5Cbeta_t%7D%20+%20%5Cfrac%7B1%7D%7B1-%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Ctextcolor%7Bblue%7D%7B%5Ctilde%7B%5Cbeta%7D_t%7D%20=%201/(%5Cfrac%7B%5Calpha_t%7D%7B%5Cbeta_t%7D%20+%20%5Cfrac%7B1%7D%7B1-%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D)%20=%20%5Ctextcolor%7Bblue%7D%7B%5Cfrac%7B1%20-%20%5Cbar%7B%5Calpha%7D_%7Bt-1%7D%7D%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%20%5Cbeta_t%7D"></p>
+</div>
+Based on the forward process formula <img src="https://latex.codecogs.com/png.latex?x_t%20=%20%5Csqrt(%5Cbar%7B%5Calpha%7D_%7Bt%7D)x_0%20+%20%5Csqrt%7B1-%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%5Cepsilon_t">, we can derive it as:
+<div style="font-size:0.8em; text-align: left">
+<p><img src="https://latex.codecogs.com/png.latex?%0Ax_0%20=%20%5Cfrac%7Bx_t-%5Csqrt%7B1-%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%5Cepsilon%7D%7B%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%7D%0A"></p>
+</div>
+By substituting this <img src="https://latex.codecogs.com/png.latex?x_0"> into the formula for <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cmu%7D_t"> and simplifying, we get
+<div style="font-size:0.8em; text-align: left">
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Ctextcolor%7Bred%7D%7B%5Cmu_t(x_t,%20t)%20=%20%5Cfrac%7B1%7D%7B%5Csqrt%7B%5Calpha_t%7D%7D%20%5Cleft(%20x_t%20-%20%5Cfrac%7B1-%5Calpha_t%7D%7B%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%7D%20%5Cepsilon(x_t,%20t)%20%5Cright)%7D%0A"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="ddpm-denoising-diffusion-probabilistic-models" class="level2">
+<h2 class="anchored" data-anchor-id="ddpm-denoising-diffusion-probabilistic-models">DDPM: Denoising Diffusion Probabilistic Models</h2>
+<section id="forward-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="forward-diffusion-process">Forward diffusion process</h3>
+<p>The forward diffusion process is essentially as Markov chain that gradually adds Gaussian noise to the data over a series of time steps until the data is completely transformed into pure random noise.</p>
+</section>
+<section id="single-step-noise-addition" class="level3">
+<h3 class="anchored" data-anchor-id="single-step-noise-addition">Single-step noise addition</h3>
+<p>Given a data point <img src="https://latex.codecogs.com/png.latex?x_0%20%5Csim%20q(x)"> from the data distribution, the forward diffusion process adds noise in <img src="https://latex.codecogs.com/png.latex?T"> discrete time steps. At each time step <img src="https://latex.codecogs.com/png.latex?t">, Gaussian noise is added to the data point according to a variance schedule <img src="https://latex.codecogs.com/png.latex?%5Cbeta_t%20=%20(%5Cbeta_1,%20%5Cbeta_2,%20%5Cldots,%20%5Cbeta_T)">. The noise addition at each step can be described by the following equation: <img src="https://latex.codecogs.com/png.latex?q(x_t%7Cx_%7Bt-1%7D)%20=%20%5Cmathcal%7BN%7D(x_t;%20%5Csqrt%7B1-%5Cbeta_t%7Dx_%7Bt-1%7D,%20%5Cbeta_t%20I)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cbeta_t"> is the variance schedule at time step <img src="https://latex.codecogs.com/png.latex?t">,which means at each time step, how much Gaussian noise is added to the data point and normally is chosen to be a small positive value. Meanswhile, <img src="https://latex.codecogs.com/png.latex?I"> is the identity matrix, ensuring that the noise is isotropic (i.e., the same in all directions). Expected mean of <img src="https://latex.codecogs.com/png.latex?x_t"> is scaled version of <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> by <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B1-%5Cbeta_t%7D">, which ensures that as more noise is added, the original data point’s influence diminishes.</p>
+<p>If we use the reparameterization trick, we can directly express the relation between <img src="https://latex.codecogs.com/png.latex?x_t"> and <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> and further more between <img src="https://latex.codecogs.com/png.latex?x_t"> and <img src="https://latex.codecogs.com/png.latex?x_0">: <img src="https://latex.codecogs.com/png.latex?x_t%20=%20%5Csqrt%7B1-%5Cbeta_t%7Dx_%7Bt-1%7D%20+%20%5Csqrt%7B%5Cbeta_t%7D%5Cepsilon_%7Bt-1%7D,%20%5Cquad%20%5Cepsilon_%7Bt-1%7D%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)"> <img src="https://latex.codecogs.com/png.latex?x_t%20=%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_t%7Dx_0%20+%20%5Csqrt%7B1-%5Cbar%7B%5Calpha%7D_t%7D%5Cepsilon,%20%5Cquad%20%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)"> where <img src="https://latex.codecogs.com/png.latex?%5Calpha_t%20=%201%20-%20%5Cbeta_t"> and <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Conversion from a distribution to an equation (The Reparameterization)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In the paper <span class="citation" data-cites="ho2020denoising">Ho, Jain, and Abbeel (2020)</span>, the authors define the forward diffusion process using a Gaussian distribution: <img src="https://latex.codecogs.com/png.latex?q(x_t%7Cx_%7Bt-1%7D)%20=%20%5Cmathcal%7BN%7D(x_t;%20%5Cunderbrace%7B%5Csqrt%7B1-%5Cbeta_t%7Dx_%7Bt-1%7D%7D_%7B%5Ctext%7Bmean%7D%5C,%5Cmu%7D,%20%5Cunderbrace%7B%5Cbeta_t%20I%7D_%7B%5Ctext%7Bvariance%7D%5C,%5Csigma%5E2%7D)"> It means <img src="https://latex.codecogs.com/png.latex?x_t%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmu,%5Csigma%5E2)">, and any variable that follows a Gaussian distribution can be expressed as: <img src="https://latex.codecogs.com/png.latex?%20X%20=%20%5Cmu%20+%20%5Csigma%20%5Codot%20%5Cepsilon,%20%5Cquad%20%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)%20"></p>
+<p>In our case, we have: <img src="https://latex.codecogs.com/png.latex?%0A%5Cmu%20=%20%5Csqrt%7B1-%5Cbeta_t%7Dx_%7Bt-1%7D,%20%5Cquad%20%5Csigma%20=%20%5Csqrt%7B%5Cbeta_t%7D%0A"> Thus, we can rewrite the forward diffusion step as: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ax_t%20=%20%5Cmu%20+%20%5Csigma%20%5Codot%20%5Cepsilon%20=%20%5Csqrt%7B1-%5Cbeta_t%7Dx_%7Bt-1%7D%20+%20%5Csqrt%7B%5Cbeta_t%7D%5Cepsilon,%20%5Cquad%20%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%20%5Cmathbf%7BI%7D)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>Otherwise, we can also express <img src="https://latex.codecogs.com/png.latex?x_t"> directly in terms of <img src="https://latex.codecogs.com/png.latex?x_0">: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ax_t%20&amp;=%20%5Csqrt%7B%5Calpha_t%7Dx_%7Bt-1%7D%20+%20%5Csqrt%7B1-%5Calpha_t%7D%5Cepsilon_%7Bt-1%7D%20%5C%5C%0A&amp;=%20%5Csqrt%7B%5Calpha_t%7D(%5Csqrt%7B%5Calpha_%7Bt-1%7D%7Dx_%7Bt-2%7D%20+%20%5Csqrt%7B1-%5Calpha_%7Bt-1%7D%7D%5Cepsilon_%7Bt-2%7D)%20+%20%5Csqrt%7B1-%5Calpha_t%7D%5Cepsilon_%7Bt-1%7D%20%5C%5C%0A&amp;=%20%5Csqrt%7B%5Calpha_t%20%5Calpha_%7Bt-1%7D%7Dx_%7Bt-2%7D%20+%20%5Csqrt%7B%5Calpha_t(1-%5Calpha_%7Bt-1%7D)%7D%5Cepsilon_%7Bt-2%7D%20+%20%5Csqrt%7B1-%5Calpha_t%7D%5Cepsilon_%7Bt-1%7D%20%5C%5C%0A%5Cend%7Baligned%7D%0A"></p>
+<p>Since <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_%7Bt-2%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_%7Bt-1%7D"> are both independent and identically distributed as <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(0,%20I)">, according to the additivity property of Gaussian distributions: <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(%5Cmu_1,%20%5Csigma_1%5E2)%20+%20%5Cmathcal%7BN%7D(%5Cmu_2,%20%5Csigma_2%5E2)%20=%20%5Cmathcal%7BN%7D(%5Cmu_1%20+%20%5Cmu_2,%20%5Csigma_1%5E2%20+%20%5Csigma_2%5E2)"> We can combine the noise terms: <img src="https://latex.codecogs.com/png.latex?%0A%5Csqrt%7B%5Calpha_t(1-%5Calpha_%7Bt-1%7D)%7D%5Cepsilon_%7Bt-2%7D%20+%20%5Csqrt%7B1-%5Calpha_t%7D%5Cepsilon_%7Bt-1%7D%20%5Csim%20%5Cmathcal%7BN%7D%5Cleft(0,%20%5Calpha_t(1-%5Calpha_%7Bt-1%7D)I%20+%20(1-%5Calpha_t)I%5Cright)%20=%20%5Cmathcal%7BN%7D%5Cleft(0,%20(1%20-%20%5Calpha_t%20%5Calpha_%7Bt-1%7D)I%5Cright)%0A"> Therefore: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ax_t%20&amp;=%20%5Csqrt%7B%5Calpha_t%20%5Calpha_%7Bt-1%7D%7Dx_%7Bt-2%7D%20+%20%5Csqrt%7B1%20-%20%5Calpha_t%20%5Calpha_%7Bt-1%7D%7D%5Cbar%7B%5Cepsilon%7D%5C%5C%0A&amp;=%5Cdots%20%5C%5C%0A&amp;=%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_t%7Dx_0%20+%20%5Csqrt%7B1-%5Cbar%7B%5Calpha%7D_t%7D%5Cepsilon,%20%5Cquad%20%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%20%5Cmathbf%7BI%7D)%20%5C%5C%0A%5Cend%7Baligned%7D%0A"> where <img src="https://latex.codecogs.com/png.latex?%5Calpha_t%20=%201%20-%20%5Cbeta_t"> and <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What is reparameterization and Why use it?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In deep generative models, we often need to sample from a probability distribution that depends on some parameters. For example, in diffusion models, a neural network predicts the mean <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and variance <img src="https://latex.codecogs.com/png.latex?%5Csigma%5E2"> of a Gaussian distribution at each time step, and then we need to sample a variable <img src="https://latex.codecogs.com/png.latex?x_t"> from <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(%5Cmu,%20%5Csigma%5E2)">.</p>
+<p>However, sampling directly from this distribution can make it difficult to compute gradients with respect to the parameters during training. Suppose our neural network has parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta">, and we want to compute the gradient of some loss function <img src="https://latex.codecogs.com/png.latex?L"> with respect to <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. If we sample <img src="https://latex.codecogs.com/png.latex?x_t"> directly from <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(%5Cmu_%5Ctheta,%20%5Csigma%5E2_%5Ctheta)">, the sampling operation is not a function, which introduces randomness that breaks the gradient flow, making it impossible to compute <img src="https://latex.codecogs.com/png.latex?%5Cnabla_%5Ctheta%20L">. The fatal problem is that the sampling operation is not differentiable.</p>
+<p>The core idea of the reparameterization trick is to seperate the randomness from the parameters by expressing the random variable <img src="https://latex.codecogs.com/png.latex?x_t"> as a deterministic function of the parameters and an independent noise variable. For a Gaussian distribution, we can express the sampling operation as:<img src="https://latex.codecogs.com/png.latex?x_t%20=%20%5Cmu_%5Ctheta%20+%20%5Csigma_%5Ctheta%20%5Ccdot%20%5Cepsilon,%20%5Cquad%20%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%201)"> Here, <img src="https://latex.codecogs.com/png.latex?%5Cepsilon%20%5Csim%20%5Cmathcal%7BN%7D(0,%201)">, which is a random variable drawn from a standard normal distribution and independent of the parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. This way, the randomness is isolated in <img src="https://latex.codecogs.com/png.latex?%5Cepsilon">, and the rest of the expression is a deterministic function of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. It can be described by the following: <img src="https://latex.codecogs.com/png.latex?x_%7Bt%7D%20=%20%5Cmu_%7B%5Ctheta%7D%20+%20%5Csigma_%7B%5Ctheta%7D%20%5Codot%20%5Cepsilon"></p>
+<p>Now, we can sample <img src="https://latex.codecogs.com/png.latex?x_t"> by sampling <img src="https://latex.codecogs.com/png.latex?%5Cepsilon"> from a fixed distribution (standard normal) and then applying the deterministic transformation. This allows us to compute gradients with respect to <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> during backpropagation, as the sampling operation is now differentiable with respect to the parameters, which <img src="https://latex.codecogs.com/png.latex?%5Cnabla_%5Cmu%20x_%7Bt%7D%20=%201"> and <img src="https://latex.codecogs.com/png.latex?%5Cnabla_%5Csigma%20x_%7Bt%7D%20=%20%5Cepsilon">.</p>
+<p>We also can compare two methods below in Pytorch:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"></span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">mu <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.tensor([<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>], requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb1-5">sigma <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.tensor([<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>], requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb1-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Direct sampling (not differentiable)</span></span>
+<span id="cb1-7">distribution <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.distributions.Normal(mu, sigma)</span>
+<span id="cb1-8">x_direct <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> distribution.sample()  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># sample() for non-differentiable case</span></span>
+<span id="cb1-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># x_direct = distribution.rsample()  # rsample() for reparameterized case</span></span>
+<span id="cb1-10">loss_direct <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (x_direct <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb1-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># loss_direct.backward()  # This would fail to compute gradients, if using rsample(), it works</span></span>
+<span id="cb1-12"></span>
+<span id="cb1-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Reparameterization trick (differentiable)</span></span>
+<span id="cb1-14">epsilon <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb1-15">x_reparam <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mu <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> sigma <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> epsilon  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># reparameterized sample</span></span>
+<span id="cb1-16">loss_reparam <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (x_reparam <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb1-17">loss_reparam.backward()  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># This works</span></span>
+<span id="cb1-18"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(mu.grad)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Gradient with respect to mu</span></span>
+<span id="cb1-19"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(sigma.grad)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Gradient with respect to sigma</span></span></code></pre></div></div>
+</div>
+</div>
+</div>
+<p>We can implement the forward process using PyTorch as follows:</p>
+<div id="e2a552a5" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch.nn.functional <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> F</span>
+<span id="cb2-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb2-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> linear_beta_schedule(timesteps, beta_start<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.0001</span>, beta_end<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.02</span>):</span>
+<span id="cb2-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb2-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Create a linear beta schedule.</span></span>
+<span id="cb2-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    </span></span>
+<span id="cb2-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Parameters:</span></span>
+<span id="cb2-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    timesteps: int</span></span>
+<span id="cb2-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        The total number of time steps T.</span></span>
+<span id="cb2-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    beta_start: float</span></span>
+<span id="cb2-12"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        The starting value of beta.</span></span>
+<span id="cb2-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    beta_end: float</span></span>
+<span id="cb2-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        The ending value of beta.</span></span>
+<span id="cb2-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        </span></span>
+<span id="cb2-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Returns:</span></span>
+<span id="cb2-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    beta_schedule: np.array</span></span>
+<span id="cb2-18"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        An array of beta values for each time step.</span></span>
+<span id="cb2-19"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb2-20">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.linspace(beta_start, beta_end, timesteps)</span>
+<span id="cb2-21"></span>
+<span id="cb2-22">T <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">300</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Total diffusion steps</span></span>
+<span id="cb2-23">betas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> linear_beta_schedule(T) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Linear beta schedule</span></span>
+<span id="cb2-24">alphas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> betas</span>
+<span id="cb2-25">alpha_bars <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.cumprod(alphas, axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Cumulative product of alphas</span></span>
+<span id="cb2-26"></span>
+<span id="cb2-27"></span>
+<span id="cb2-28"></span>
+<span id="cb2-29"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward_diffusion_sample(x_0, t, noise<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>):</span>
+<span id="cb2-30">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb2-31"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Perform the forward diffusion process to obtain x_t from x_0.</span></span>
+<span id="cb2-32"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    </span></span>
+<span id="cb2-33"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Parameters:</span></span>
+<span id="cb2-34"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    x_0: torch.Tensor</span></span>
+<span id="cb2-35"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        The original data point (batch_size, data_dim).</span></span>
+<span id="cb2-36"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    t: int</span></span>
+<span id="cb2-37"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        The time step at which to sample x_t.</span></span>
+<span id="cb2-38"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    noise: torch.Tensor or None</span></span>
+<span id="cb2-39"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        Optional noise to add. If None, random noise will be generated.</span></span>
+<span id="cb2-40"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        </span></span>
+<span id="cb2-41"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Returns:</span></span>
+<span id="cb2-42"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    x_t: torch.Tensor</span></span>
+<span id="cb2-43"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        The noised data point at time step t.</span></span>
+<span id="cb2-44"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb2-45">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> noise <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">is</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="cb2-46">        noise <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn_like(x_0)</span>
+<span id="cb2-47">    </span>
+<span id="cb2-48">    sqrt_alpha_bar_t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.sqrt(alpha_bars[t])[:, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>]  </span>
+<span id="cb2-49">    sqrt_one_minus_alpha_bar_t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> alpha_bars[t])[:, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>] </span>
+<span id="cb2-50">    </span>
+<span id="cb2-51">    x_t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sqrt_alpha_bar_t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> x_0 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> sqrt_one_minus_alpha_bar_t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> noise</span>
+<span id="cb2-52">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> x_t</span></code></pre></div></div>
+</div>
+</section>
+</section>
+<section id="reverse-diffusion-process" class="level2">
+<h2 class="anchored" data-anchor-id="reverse-diffusion-process">Reverse diffusion process</h2>
+<p>In the process of forward diffusion, we defined how to gradually add Gaussian noise to the data using <img src="https://latex.codecogs.com/png.latex?q(x_t%7Cx_%7Bt-1%7D)">. The reverse diffusion process aims to reverse this noising process, gradually removing the noise to recover the original data from pure noise by using its reverse conditional distribution <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t)">. If we can accurately model this reverse process, we can start from random noise <img src="https://latex.codecogs.com/png.latex?x_T%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)"> and iteratively sample <img src="https://latex.codecogs.com/png.latex?x_%7BT-1%7D,%20x_%7BT-2%7D,%20%5Cldots,%20x_0"> to generate new data samples that resemble the original data distribution.</p>
+<section id="can-we-directly-compute-the-reverse-conditional-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="can-we-directly-compute-the-reverse-conditional-distribution">Can we directly compute the reverse conditional distribution？</h3>
+<p>In theory, if we have access to the true data distribution and the forward process, we can compute the reverse conditional distribution <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t)"> using Bayes’ theorem: <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t)%20=%20%5Cfrac%7Bq(x_t%7Cx_%7Bt-1%7D)q(x_%7Bt-1%7D)%7D%7Bq(x_t)%7D"> However, in practice, this is infeasible for several reasons:</p>
+<ol type="1">
+<li><p><strong>Unknown Data Distribution</strong>: We typically do not have access to the true data distribution <img src="https://latex.codecogs.com/png.latex?q(x%20-%201)">. The reason is that we only have a finite dataset of samples from the data distribution, not the distribution itself.</p></li>
+<li><p><strong>Intractable Integrals</strong>: The denominator <img src="https://latex.codecogs.com/png.latex?q(x_t)"> is referred to as the marginal distribution of <img src="https://latex.codecogs.com/png.latex?x_t">. If we want to compute the probability at a specific time step <img src="https://latex.codecogs.com/png.latex?t">, we need to integrate over all possible previous states <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D">: <img src="https://latex.codecogs.com/png.latex?q(x_t)%20=%20%5Cint%20q(x_t%7Cx_%7Bt-1%7D)q(x_%7Bt-1%7D)dx_%7Bt-1%7D"> This integral is often intractable, especially in high-dimensional spaces, which is called the “curse of dimensionality”.</p></li>
+</ol>
+<p>Due to these challenges, we cannot directly compute <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t)"> and instead need to approximate it using a parameterized model, such as a neural network.</p>
+</section>
+<section id="using-a-neural-network-to-approximate-the-reverse-process" class="level3">
+<h3 class="anchored" data-anchor-id="using-a-neural-network-to-approximate-the-reverse-process">Using a neural network to approximate the reverse process</h3>
+<p>We can use a neural network with parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> to approximate the reverse conditional distribution. When the diffusion step size <img src="https://latex.codecogs.com/png.latex?%5Cbeta_t"> is sufficiently small, the reverse process <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%20%5Cmid%20x_t)"> also follows a Gaussian distribution. Therefore, we can define the neural network outputs as the parameters of this Gaussian distribution: <img src="https://latex.codecogs.com/png.latex?%0Ap_%5Ctheta(x_%7B0:T%7D)%20=%20p(x_T)%20%5Cprod_%7Bt=1%7D%5E%7BT%7D%20p_%5Ctheta(x_%7Bt-1%7D%7Cx_t)%20%5Cquad%0Ap_%5Ctheta(x_%7Bt-1%7D%7Cx_t)%20=%20%5Cmathcal%7BN%7D(x_%7Bt-1%7D;%20%5Cmu_%5Ctheta(x_t,%20t),%20%5CSigma_%5Ctheta(x_t,%20t))%0A"> where <img src="https://latex.codecogs.com/png.latex?%5Cmu_%5Ctheta(x_t,%20t)"> and <img src="https://latex.codecogs.com/png.latex?%5CSigma_%5Ctheta(x_t,%20t)"> are the mean and covariance predicted by the neural network for the reverse step from <img src="https://latex.codecogs.com/png.latex?x_t"> to <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D">.</p>
+<p>What is more, in the paper <span class="citation" data-cites="ho2020denoising">Ho, Jain, and Abbeel (2020)</span>, the authors find that using a fixed covariance <img src="https://latex.codecogs.com/png.latex?%5CSigma_%5Ctheta(x_t,%20t)%20=%20%5Cbeta_t%20I"> works well in practice, simplifying the model to only predict the mean <img src="https://latex.codecogs.com/png.latex?%5Cmu_%5Ctheta(x_t,%20t)">, which is the main focus of the training process.</p>
+<p>Now, we can train the neural network to learn the parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> such that the reverse process <img src="https://latex.codecogs.com/png.latex?p_%5Ctheta(x_%7Bt-1%7D%7Cx_t)"> closely approximates the true but unknow reverse conditional distribution <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t)">. To train the model, we aim to maximize the log-likelihood of the real data <img src="https://latex.codecogs.com/png.latex?x_0"> under the model, <img src="https://latex.codecogs.com/png.latex?%5Clog%20p_%5Ctheta(x_0)">. Because direct likelihood optimization is intractable, we resort to Jensen’s inequality and optimize the corresponding Evidence Lower Bound (ELBO): <img src="https://latex.codecogs.com/png.latex?-%20%5Clog%20p_%5Ctheta(x_0)%20%5Cle%20%5Cmathbb%7BE%7D_%7Bq%7D%20%5Cleft%5B%20%5Clog%20%5Cfrac%7Bq(x_%7B1:T%7D%7Cx_0)%7D%7Bp_%5Ctheta(x_%7B0:T%7D)%7D%20%5Cright%5D%20=%20%5Ctext%7BELBO%7D"></p>
+<p>To convert each term in the equation to be analytically computable, the objective can be further rewritten to be a combination of several KL-divergence and entropy terms (See the detailed step-by-step process in <span class="citation" data-cites="sohldickstein2015deepunsupervisedlearningusing">J. Sohl-Dickstein et al. (2015)</span>): <img src="https://latex.codecogs.com/png.latex?%5Csmall%20%5Ctext%7BELBO%7D%20=%20%5Cmathbb%7BE%7D_%7Bq%7D%20%5Cleft%5B%20%5Cunderbrace%7BD_%7BKL%7D(q(x_T%7Cx_0)%20%7C%7C%20p_%5Ctheta(x_T))%7D_%7BL_T%7D%20%20+%20%5Csum_%7Bt=2%7D%5E%7BT%7D%20%5Cunderbrace%7BD_%7BKL%7D(q(x_%7Bt-1%7D%7Cx_t,%20x_0)%20%7C%7C%20p_%5Ctheta(x_%7Bt-1%7D%7Cx_t))%7D_%7BL_%7Bt-1%7D%7D%20%5Cunderbrace%7B-%20%5Clog%20p_%5Ctheta(x_0%7Cx_1)%7D_%7BL_0%7D%20%5Cright%5D"> where <img src="https://latex.codecogs.com/png.latex?D_%7BKL%7D(P%7C%7CQ)"> is the Kullback-Leibler divergence between two distributions <img src="https://latex.codecogs.com/png.latex?P"> and <img src="https://latex.codecogs.com/png.latex?Q">.</p>
+<p>Although the <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t)"> is intractable, <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t,%20x_0)"> is tractable because we condition on the original data point <img src="https://latex.codecogs.com/png.latex?x_0">. While <img src="https://latex.codecogs.com/png.latex?x_0"> is unknown at inference time, it is available during training as part of the dataset. Following the Equation&nbsp;4 and Equation&nbsp;5, we can derive the closed-form expression for <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t,%20x_0)"> as a Gaussian distribution with mean <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cmu%7D_t(x_t,%20x_0)"> and variance <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7B%5Cbeta%7D_t%20I">.</p>
+<p>Now, our current goal is to have the neural network <img src="https://latex.codecogs.com/png.latex?p_%5Ctheta%20%5Csim%20%5Cmathcal%7BN%7D%5Cleft(%5Cmu_%5Ctheta,%5CSigma_%5Ctheta%5Cright)"> approximate the true distribution <img src="https://latex.codecogs.com/png.latex?q(x_%7Bt-1%7D%7Cx_t,%20x_0)%20%5Csim%20%5Cmathcal%7BN%7D%5Cleft(%5Ctilde%7B%5Cmu%7D_t,%20%5Ctilde%7B%5Cbeta%7D_t%5Cright)">. Since the parameter <img src="https://latex.codecogs.com/png.latex?%5CSigma_%5Ctheta"> is often fixed as <img src="https://latex.codecogs.com/png.latex?%5Cbeta_t%20I">, we mainly focus on training the neural network to predict the mean <img src="https://latex.codecogs.com/png.latex?%5Ctextcolor%7Bred%7D%7B%5Cmu_%5Ctheta%7D"> to be as close as possible to the true mean <img src="https://latex.codecogs.com/png.latex?%5Ctextcolor%7Bred%7D%7B%5Ctilde%7B%5Cmu%7D_t%20=%20%5Cfrac%7B1%7D%7B%5Csqrt%7B%5Calpha_t%7D%7D%20%5Cleft(%20x_t%20-%20%5Cfrac%7B1%20-%20%5Calpha_t%7D%7B%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%7D%20%5Cepsilon_t%20%5Cright)%7D">.</p>
+<p>The equation means that to accurately predict the mean <img src="https://latex.codecogs.com/png.latex?%5Cmu_%5Ctheta">, the neural network only needs to predict the noise <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_%5Ctheta"> present in the current image.</p>
+<p>This can be achieved by minimizing the KL-divergence between these two distributions:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AL_%7Bt%7D%20&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0,%5Cepsilon%7D%20%5Cleft%5BD_%7BKL%7D(q(x_%7Bt-1%7D%7Cx_t,%20x_0)%20%7C%7C%20p_%5Ctheta(x_%7Bt-1%7D%7Cx_t))%5Cright%5D%5C%5C%0A&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0,%5Cepsilon%7D%20%5Cleft%5B%5Cfrac%7B1%7D%7B2%5C%7C%5CSigma_%7B%5Ctheta%7D(x_t,t)%5C%7C_2%20%5E%202%7D%5C%7C%20%5Ctilde%7B%5Cmu%7D_t(x_t,%20x_0)%20-%20%5Cmu_%5Ctheta(x_t,%20t)%20%5C%7C%5E2%5Cright%5D%5C%5C%0A&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0,%5Cepsilon%7D%20%5Cleft%5B%5Cfrac%7B1%7D%7B2%5C%7C%5CSigma_%7B%5Ctheta%7D(x_t,t)%5C%7C_2%20%5E%202%7D%5C%7C%20%5Cfrac%7B1%7D%7B%5Csqrt%7B%5Calpha_t%7D%7D%20%5Cleft(%20x_t%20-%20%5Cfrac%7B1%20-%20%5Calpha_t%7D%7B%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%7D%20%5Cepsilon_t%20%5Cright)%20-%20%5Cfrac%7B1%7D%7B%5Csqrt%7B%5Calpha_t%7D%7D%20%5Cleft(%20x_t%20-%20%5Cfrac%7B1%20-%20%5Calpha_t%7D%7B%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%7D%20%5Cepsilon_%5Ctheta(x_t,%20t)%20%5Cright)%20%5C%7C%5E%7B2%7D%5Cright%5D%5C%5C%0A&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0,%5Cepsilon%7D%20%5Cleft%5B%5Cfrac%7B(1-%5Calpha_t)%5E2%7D%7B2%5Calpha_t(1-%5Cbar%7B%5Calpha%7D_t)%5C%7C%20%5CSigma_%5Ctheta%20%5C%7C_2%5E2%7D%0A%5Cleft%5ClVert%0A%5Cepsilon_t%20-%20%5Cepsilon_%5Ctheta(x_t,t)%0A%5Cright%5CrVert%5E2%0A%5Cright%5D%20%5C%5C%0A&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0,%5Cepsilon%7D%0A%5Cleft%5B%0A%5Cfrac%7B(1-%5Calpha_t)%5E2%7D%0A%7B2%5Calpha_t(1-%5Cbar%7B%5Calpha%7D_t)%5Cleft%5ClVert%20%5CSigma_%5Ctheta%20%5Cright%5CrVert%20_2%5E2%7D%0A%5Cleft%5ClVert%0A%5Cepsilon_t%20-%0A%5Cepsilon_%5Ctheta%5C!%5Cleft(%0A%5Csqrt%7B%5Cbar%7B%5Calpha%7D_t%7D%20x_0%20+%0A%5Csqrt%7B1-%5Cbar%7B%5Calpha%7D_t%7D%5C,%5Cepsilon_t,%0At%0A%5Cright)%0A%5Cright%5CrVert%5E2%0A%5Cright%5D%0A%5Cend%7Baligned%7D%0A"></p>
+<p><span class="citation" data-cites="ho2020denoising">Ho, Jain, and Abbeel (2020)</span> further simplifies the loss function by removing the weighting term, leading to a more straightforward objective:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%20%7B%5Ctextcolor%7Bred%7D%7BL_t%5E%7Bsimple%7D%20=%20%5Cmathbb%7BE%7D_%7Bx_0,%5Cepsilon,t%7D%20%5Cleft%5B%5Cleft%5ClVert%20%5Cepsilon_t%20-%20%5Cepsilon_%5Ctheta(x_t,t)%20%5Cright%5CrVert%5E2%5Cright%5D%7D%7D%0A"></p>
+<p>The final training objective is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AL_%7Bsimple%7D%20=%20L_t%5E%7Bsimple%7D%20+%20C%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?C"> is a constant that does not depend on the model parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> and can be ignored during optimization.</p>
+<p><img src="https://your-website-url.example.com/posts/diffusion-model/figures/DDPM-algo.png" class="img-fluid"></p>
+</section>
+<section id="sampling-from-the-trained-model" class="level3">
+<h3 class="anchored" data-anchor-id="sampling-from-the-trained-model">Sampling from the trained model</h3>
+<p>Once the neural network which can predict the noise <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_%5Ctheta(x_t,%20t)"> is trained, we can use it to sample new data points by reversing the diffusion process. Starting from pure Gaussian noise <img src="https://latex.codecogs.com/png.latex?x_T%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)">, we iteratively apply the reverse diffusion steps using the learned model.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ax_%7Bt-1%7D%20=%20%5Cfrac%7B1%7D%7B%5Csqrt%7B%5Calpha_t%7D%7D%20%5Cleft(%20x_t%20-%20%5Cfrac%7B1%20-%20%5Calpha_t%7D%7B%5Csqrt%7B1%20-%20%5Cbar%7B%5Calpha%7D_t%7D%7D%20%5Cepsilon_%5Ctheta(x_t,%20t)%20%5Cright)%20+%20%5Csigma_t%20z%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?z%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)"> is random noise added at each step to maintain stochasticity, and <img src="https://latex.codecogs.com/png.latex?%5Csigma_t"> is a scaling factor that can be adjusted based on the desired level of noise during sampling.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why we need to add <img src="https://latex.codecogs.com/png.latex?%5Csigma_t%20z">？
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This term corresponds to Langevin dynamics. Without it, the sampling process becomes a deterministic numerical procedure, which often leads to overly smooth images with a lack of fine details. Introducing stochastic perturbations helps correct estimation errors at each step and enables the generative model to better explore the true image manifold.</p>
+</div>
+</div>
+</section>
+<section id="how-to-train-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-train-the-model">How to train the model</h3>
+<p>We get the simplified loss function as follows:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AL_%7Bsimple%7D%20=%20%5Cleft%5C%7C%5Cepsilon_t%20-%20%5Cepsilon_%5Ctheta(x_t,t)%20%5Cright%5C%7C%5E2%0A"></p>
+<p>This means that the training procedure consists of only four steps:</p>
+<ol type="1">
+<li><p><strong>Random sampling</strong>: Randomly sample a data point <img src="https://latex.codecogs.com/png.latex?x_0"> from the training dataset.</p></li>
+<li><p><strong>Random timestep</strong>: Select a random time step $ t $.</p></li>
+<li><p><strong>Add noise in the forward process</strong>: Generate a noisy version of the data point <img src="https://latex.codecogs.com/png.latex?x_t"> using the forward diffusion equation:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20x_t%20=%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_t%7Dx_0%20+%20%5Csqrt%7B1-%5Cbar%7B%5Calpha%7D_t%7D%5Cepsilon_t,%20%5Cquad%20%5Cepsilon_t%20%5Csim%20%5Cmathcal%7BN%7D(0,%20I)"></p></li>
+<li><p><strong>Train the model</strong>: Use the noisy image <img src="https://latex.codecogs.com/png.latex?x_t"> and the corresponding noise <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_t"> to train the neural network <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_%5Ctheta(x_t,%20t)"> to predict the noise.</p></li>
+<li><p><strong>Loss computation</strong>: Compute the loss using the simplified loss function:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20L_%7Bsimple%7D%20=%20%5Cleft%5C%7C%5Cepsilon_t%20-%20%5Cepsilon_%5Ctheta(x_t,t)%20%5Cright%5C%7C%5E2%20"></p></li>
+</ol>
+
+
+
+
+</section>
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0">
+<div id="ref-ho2020denoising" class="csl-entry">
+Ho, Jonathan, Ajay Jain, and Pieter Abbeel. 2020. <span>“Denoising Diffusion Probabilistic Models.”</span> <em>arXiv Preprint arXiv:2006.11239</em>.
+</div>
+<div id="ref-SohlDickstein2015DeepUL" class="csl-entry">
+Sohl-Dickstein, Jascha Narain, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 2015. <span>“Deep Unsupervised Learning Using Nonequilibrium Thermodynamics.”</span> <em>ArXiv</em> abs/1503.03585. <a href="https://api.semanticscholar.org/CorpusID:14888175">https://api.semanticscholar.org/CorpusID:14888175</a>.
+</div>
+<div id="ref-sohldickstein2015deepunsupervisedlearningusing" class="csl-entry">
+Sohl-Dickstein, Jascha, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 2015. <span>“Deep Unsupervised Learning Using Nonequilibrium Thermodynamics.”</span> <a href="https://arxiv.org/abs/1503.03585">https://arxiv.org/abs/1503.03585</a>.
+</div>
+</div></section></div> ]]></description>
+  <category>Deep Learning</category>
+  <category>Math</category>
+  <guid>https://your-website-url.example.com/posts/diffusion-model/</guid>
+  <pubDate>Thu, 08 Jan 2026 16:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
