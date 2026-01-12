@@ -6,15 +6,15 @@
       version="2.0">
 <channel>
 <title>my-tech-notebook</title>
-<link>https://your-website-url.example.com/</link>
-<atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
+<link>https://sunhk7.github.io/</link>
+<atom:link href="https://sunhk7.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog built with Quarto</description>
 <generator>quarto-1.8.26</generator>
 <lastBuildDate>Thu, 08 Jan 2026 16:00:00 GMT</lastBuildDate>
 <item>
   <title>Diffusion Model</title>
   <dc:creator>Yuyang </dc:creator>
-  <link>https://your-website-url.example.com/posts/diffusion-model/</link>
+  <link>https://sunhk7.github.io/posts/diffusion-model/</link>
   <description><![CDATA[ 
 
 
@@ -58,11 +58,11 @@
 <section id="forward-single-step-diffusion-process" class="level3">
 <h3 class="anchored" data-anchor-id="forward-single-step-diffusion-process">Forward single-step diffusion process</h3>
 <p>Let <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%201%20-%20%5Calpha"> in Equation&nbsp;1. We can then derive the formula for <img src="https://latex.codecogs.com/png.latex?x_i"> corresponding to a given <img src="https://latex.codecogs.com/png.latex?x_%7Bi-1%7D">. Since <img src="https://latex.codecogs.com/png.latex?%5Calpha%20=%20%5B0.99999,%20%5Cdots,%200.999%5D">, at each time step, <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D"> is scaled by <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B%5Calpha_t%7D"> and some noise is added. Because the noise follows a Gaussian distribution, conditioned on <img src="https://latex.codecogs.com/png.latex?x_%7Bt-1%7D">, <img src="https://latex.codecogs.com/png.latex?x_t"> also follows a Gaussian distribution <img src="https://latex.codecogs.com/png.latex?N">. Then, a random sample from the distribution of <img src="https://latex.codecogs.com/png.latex?x_i"> is used as the input for determining <img src="https://latex.codecogs.com/png.latex?x_%7Bt+1%7D">, and this process is iterated step by step. As a result, at each time step, <img src="https://latex.codecogs.com/png.latex?x_t"> moves closer to the origin. When <img src="https://latex.codecogs.com/png.latex?T"> is sufficiently large, i.e., there are enough time steps, the final <img src="https://latex.codecogs.com/png.latex?x_i"> follows a standard normal distribution: <img src="https://latex.codecogs.com/png.latex?x_t%20%5Csim%20N(0,1)">. <span id="eq-eq2"><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft%5C%7B%0A%5Cbegin%7Baligned%7D%0A%20%20x_t%20=%20%5Csqrt%7B%5Calpha_%7Bt%7D%7D%20%5Ccdot%20x_%7Bt-1%7D%20+%20%5Csqrt%7B%201-%20%5Calpha_%7Bt%7D%7D%20%5Ccdot%20%5Cepsilon_%7Bt-1%7D%20%5C%5C%0A%20%20p(x_t%7Cx_%7Bt-1%7D)%20%5Csim%20%5Cmathcal%7BN%7D(%5Csqrt%7B%5Calpha_%7Bt%7D%7D%20%5Ccdot%20x_%7Bt-1%7D,%201-%20%5Calpha_%7Bt%7D)%0A%5Cend%7Baligned%7D%0A%5Cright.%0A%5Ctag%7B2%7D"></span> where <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">.</p>
-<p><img src="https://your-website-url.example.com/posts/diffusion-model/figures/2015singlestep.png" class="img-fluid"></p>
+<p><img src="https://sunhk7.github.io/posts/diffusion-model/figures/2015singlestep.png" class="img-fluid"></p>
 </section>
 <section id="multi-step-forward-diffusion-process" class="level3">
 <h3 class="anchored" data-anchor-id="multi-step-forward-diffusion-process">Multi-step forward diffusion process</h3>
-<p>By recursively applying the single-step diffusion process in Equation&nbsp;2, we can derive the multi-step forward diffusion process. Specifically, we can express <img src="https://latex.codecogs.com/png.latex?x_t"> directly in terms of the original data point <img src="https://latex.codecogs.com/png.latex?x_0"> and the accumulated noise over <img src="https://latex.codecogs.com/png.latex?t"> steps. This leads to the following equations: <span id="eq-eq3"><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft%5C%7B%0A%5Cbegin%7Baligned%7D%0A%20%20x_t%20=%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20x_0%20+%20%5Csqrt%7B%201-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20%5Cepsilon_t%20%5C%5C%0A%20%20p(x_t%7Cx_0)%20%5Csim%20%5Cmathcal%7BN%7D(%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20x_0,%201-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D)%0A%5Cend%7Baligned%7D%0A%5Cright.%0A%5Ctag%7B3%7D"></span> where <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">. <img src="https://your-website-url.example.com/posts/diffusion-model/figures/2015multistep.png" class="img-fluid"></p>
+<p>By recursively applying the single-step diffusion process in Equation&nbsp;2, we can derive the multi-step forward diffusion process. Specifically, we can express <img src="https://latex.codecogs.com/png.latex?x_t"> directly in terms of the original data point <img src="https://latex.codecogs.com/png.latex?x_0"> and the accumulated noise over <img src="https://latex.codecogs.com/png.latex?t"> steps. This leads to the following equations: <span id="eq-eq3"><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft%5C%7B%0A%5Cbegin%7Baligned%7D%0A%20%20x_t%20=%20%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20x_0%20+%20%5Csqrt%7B%201-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20%5Cepsilon_t%20%5C%5C%0A%20%20p(x_t%7Cx_0)%20%5Csim%20%5Cmathcal%7BN%7D(%5Csqrt%7B%5Cbar%7B%5Calpha%7D_%7Bt%7D%7D%20%5Ccdot%20x_0,%201-%20%5Cbar%7B%5Calpha%7D_%7Bt%7D)%0A%5Cend%7Baligned%7D%0A%5Cright.%0A%5Ctag%7B3%7D"></span> where <img src="https://latex.codecogs.com/png.latex?%5Cbar%7B%5Calpha%7D_t%20=%20%5Cprod_%7Bs=1%7D%5E%7Bt%7D%20%5Calpha_s">. <img src="https://sunhk7.github.io/posts/diffusion-model/figures/2015multistep.png" class="img-fluid"></p>
 </section>
 <section id="single-step-reverse-diffusion-process" class="level3">
 <h3 class="anchored" data-anchor-id="single-step-reverse-diffusion-process">Single-step reverse diffusion process</h3>
@@ -487,7 +487,7 @@ font-style: inherit;">return</span> x_t</span></code></pre></div></div>
 <p>The final training objective is:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0AL_%7Bsimple%7D%20=%20L_t%5E%7Bsimple%7D%20+%20C%0A"></p>
 <p>where <img src="https://latex.codecogs.com/png.latex?C"> is a constant that does not depend on the model parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> and can be ignored during optimization.</p>
-<p><img src="https://your-website-url.example.com/posts/diffusion-model/figures/DDPM-algo.png" class="img-fluid"></p>
+<p><img src="https://sunhk7.github.io/posts/diffusion-model/figures/DDPM-algo.png" class="img-fluid"></p>
 </section>
 <section id="sampling-from-the-trained-model" class="level3">
 <h3 class="anchored" data-anchor-id="sampling-from-the-trained-model">Sampling from the trained model</h3>
@@ -543,7 +543,7 @@ Sohl-Dickstein, Jascha, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 
 </div></section></div> ]]></description>
   <category>Deep Learning</category>
   <category>Math</category>
-  <guid>https://your-website-url.example.com/posts/diffusion-model/</guid>
+  <guid>https://sunhk7.github.io/posts/diffusion-model/</guid>
   <pubDate>Thu, 08 Jan 2026 16:00:00 GMT</pubDate>
 </item>
 </channel>
