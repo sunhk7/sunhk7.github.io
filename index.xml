@@ -10,7 +10,7 @@
 <atom:link href="https://sunhk7.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog built with Quarto</description>
 <generator>quarto-1.8.26</generator>
-<lastBuildDate>Thu, 08 Jan 2026 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 09 Jan 2026 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Diffusion Model</title>
   <dc:creator>Yuyang </dc:creator>
@@ -544,7 +544,7 @@ Sohl-Dickstein, Jascha, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 
   <category>Deep Learning</category>
   <category>Math</category>
   <guid>https://sunhk7.github.io/posts/diffusion-model/</guid>
-  <pubDate>Thu, 08 Jan 2026 16:00:00 GMT</pubDate>
+  <pubDate>Fri, 09 Jan 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
