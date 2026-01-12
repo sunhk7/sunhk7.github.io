@@ -19,6 +19,8 @@ format:
       - brand
     css: styles.css
     math: mathjax
+execute: 
+  freeze: auto
 
 
 
