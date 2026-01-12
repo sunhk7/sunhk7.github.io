@@ -1,0 +1,74 @@
+/* css styles */
+/* Python 代码块 */
+/* 写法 A：针对所有代码块（最稳妥） */
+pre.sourceCode, code.sourceCode {
+  background-color: #ffffff;
+  font-family: "Fira Code", monospace;
+  font-size: 13px !important; /* 强制生效 */
+  border-radius: 6px;
+  line-height: 1.4;
+  border: 1px solid #eee;
+}
+
+div.sourceCode {
+    margin-bottom: 1em; /* 代码块与其他文字的间距 */
+}
+
+
+/* 1. 行内公式：保持原样或微调 */
+.katex {
+    font-size: 0.8em !important; 
+}
+
+/* 2. 独立公式：单独缩小 */
+.katex-display > .katex {
+    font-size: 0.8em !important; /* 这里实际上覆盖了上面的设置 */
+}
+
+/* 1. 关键字 (def, class, import, return, if, else) */
+code span.kw {
+    color: #cf222e !important; /* 红色 */
+    font-weight: bold;         /* 加粗，如果不想要可以去掉 */
+}
+
+/* 2. 函数名 (在 def 之后的那个名字) */
+code span.fu {
+    color: #8250df !important; /* 紫色 */
+}
+
+/* 3. 内置常量与字面量 (None, True, False) */
+code span.cn {
+    color: #0550ae !important; /* 深蓝色 */
+}
+
+/* 4. 内置函数 (print, len, range 等) */
+code span.bu {
+    color: #953800 !important; /* 棕橙色 */
+}
+
+/* 5. 字符串 ("hello world") */
+code span.st {
+    color: #0a3069 !important; /* 藏青色 */
+}
+
+/* 6. 注释 (# 这是一个注释) */
+code span.co {
+    color: #6e7781 !important; /* 灰色 */
+    font-style: italic;        /* 斜体 */
+}
+
+/* 7. 数字 (123, 3.14) */
+code span.dv, code span.fl {
+    color: #0550ae !important; /* 蓝色 */
+}
+
+/* 8. 类名 (class MyClass) - 只有部分高亮引擎能识别 */
+code span.cl {
+    color: #953800 !important;
+}
+
+/* 9. 装饰器 (@staticmethod) */
+code span.at {
+    color: #8250df !important;
+}
+

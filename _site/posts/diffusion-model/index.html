@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yuyang">
+<meta name="dcterms.date" content="2026-01-09">
+
+<title>Diffusion Model – my-tech-notebook</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ac1a48248070c8bfbae4244efd7728e4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-3a5152645a92dd9dca49d04624f0508a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">my-tech-notebook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Diffusion Model</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">Deep Learning</div>
+                <div class="quarto-category">Math</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Yuyang </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 9, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#diffusion-models" id="toc-diffusion-models" class="nav-link active" data-scroll-target="#diffusion-models">Diffusion Models</a>
+  <ul class="collapse">
+  <li><a href="#what-is-diffusion-model" id="toc-what-is-diffusion-model" class="nav-link" data-scroll-target="#what-is-diffusion-model">What is Diffusion Model?</a></li>
+  <li><a href="#sde-stochastic-differential-equations" id="toc-sde-stochastic-differential-equations" class="nav-link" data-scroll-target="#sde-stochastic-differential-equations">SDE: Stochastic Differential Equations</a></li>
+  <li><a href="#from-sde-to-diffusion-models" id="toc-from-sde-to-diffusion-models" class="nav-link" data-scroll-target="#from-sde-to-diffusion-models">From SDE to Diffusion Models</a>
+  <ul class="collapse">
+  <li><a href="#forward-single-step-diffusion-process" id="toc-forward-single-step-diffusion-process" class="nav-link" data-scroll-target="#forward-single-step-diffusion-process">Forward single-step diffusion process</a></li>
+  <li><a href="#multi-step-forward-diffusion-process" id="toc-multi-step-forward-diffusion-process" class="nav-link" data-scroll-target="#multi-step-forward-diffusion-process">Multi-step forward diffusion process</a></li>
+  <li><a href="#single-step-reverse-diffusion-process" id="toc-single-step-reverse-diffusion-process" class="nav-link" data-scroll-target="#single-step-reverse-diffusion-process">Single-step reverse diffusion process</a></li>
+  </ul></li>
+  <li><a href="#ddpm-denoising-diffusion-probabilistic-models" id="toc-ddpm-denoising-diffusion-probabilistic-models" class="nav-link" data-scroll-target="#ddpm-denoising-diffusion-probabilistic-models">DDPM: Denoising Diffusion Probabilistic Models</a>
+  <ul class="collapse">
+  <li><a href="#forward-diffusion-process" id="toc-forward-diffusion-process" class="nav-link" data-scroll-target="#forward-diffusion-process">Forward diffusion process</a></li>
+  <li><a href="#single-step-noise-addition" id="toc-single-step-noise-addition" class="nav-link" data-scroll-target="#single-step-noise-addition">Single-step noise addition</a></li>
+  </ul></li>
+  <li><a href="#reverse-diffusion-process" id="toc-reverse-diffusion-process" class="nav-link" data-scroll-target="#reverse-diffusion-process">Reverse diffusion process</a>
+  <ul class="collapse">
+  <li><a href="#can-we-directly-compute-the-reverse-conditional-distribution" id="toc-can-we-directly-compute-the-reverse-conditional-distribution" class="nav-link" data-scroll-target="#can-we-directly-compute-the-reverse-conditional-distribution">Can we directly compute the reverse conditional distribution？</a></li>
+  <li><a href="#using-a-neural-network-to-approximate-the-reverse-process" id="toc-using-a-neural-network-to-approximate-the-reverse-process" class="nav-link" data-scroll-target="#using-a-neural-network-to-approximate-the-reverse-process">Using a neural network to approximate the reverse process</a></li>
+  <li><a href="#sampling-from-the-trained-model" id="toc-sampling-from-the-trained-model" class="nav-link" data-scroll-target="#sampling-from-the-trained-model">Sampling from the trained model</a></li>
+  <li><a href="#how-to-train-the-model" id="toc-how-to-train-the-model" class="nav-link" data-scroll-target="#how-to-train-the-model">How to train the model</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="diffusion-models" class="level1">
+<h1>Diffusion Models</h1>
+<section id="what-is-diffusion-model" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-diffusion-model">What is Diffusion Model?</h2>
+<p>Diffusion models are a class of image generative neural networks inspired by and formulated as a simulation of the thermodynamic diffusion process. The core idea is to model the data generation process as a gradual denoising process, where a neural network learns to reverse a diffusion process that progressively adds noise to the data until it becomes pure noise. By learning this reverse process, the model can generate new data samples from random noise.</p>
+</section>
+<section id="sde-stochastic-differential-equations" class="level2">
+<h2 class="anchored" data-anchor-id="sde-stochastic-differential-equations">SDE: Stochastic Differential Equations</h2>
+<p>Diffusion models can be mathematically described using Stochastic Differential Equations (SDEs). <span class="citation" data-cites="SohlDickstein2015DeepUL">J. N. Sohl-Dickstein et al. (<a href="#ref-SohlDickstein2015DeepUL" role="doc-biblioref">2015</a>)</span> introduced the concept of diffusion probabilistic models, which can be viewed as a discrete-time approximation of continuous-time SDEs.</p>
+<p>A stochastic differential equation (SDE) in one-dimensional space can be expressed as: <span class="math display">\[dx = f(x, t)dt + g(t)dW_t \quad dW_t \sim \mathcal{N}(0, dt)\]</span> where: - <span class="math inline">\(x\)</span> is the state variable (e.g., pixel values of an image). - <span class="math inline">\(t\)</span> is time. - <span class="math inline">\(f(x, t)\)</span> is the drift coefficient, representing the deterministic part of the evolution of <span class="math inline">\(x\)</span> over time. - <span class="math inline">\(g(t)\)</span> is the diffusion coefficient, representing the stochastic part of the evolution. - <span class="math inline">\(dW_t\)</span> is the increment of a Wiener process (or Brownian motion), which introduces randomness into the system.</p>
+<p>The equation describes how the state variable <span class="math inline">\(x\)</span> evolves over time under the influence of both deterministic and stochastic components. The drift term <span class="math inline">\(f(x, t)dt\)</span> captures the systematic changes in <span class="math inline">\(x\)</span>, while the diffusion term <span class="math inline">\(g(t)dW_t\)</span> captures the random fluctuations.</p>
+<p>It is worth noting that when the deterministic component <span class="math inline">\(f(x,t)\)</span> is negatively correlated with the position variable <span class="math inline">\(x\)</span>, the value of <span class="math inline">\(x\)</span> will gradually move toward the origin as time progresses. Meanwhile, due to the presence of the stochastic term, <span class="math inline">\(x\)</span> will eventually undergo random motion around the origin, following a Gaussian distribution.</p>
+</section>
+<section id="from-sde-to-diffusion-models" class="level2">
+<h2 class="anchored" data-anchor-id="from-sde-to-diffusion-models">From SDE to Diffusion Models</h2>
+<p>In diffusion models, the forward diffusion process can be described by a specific type of SDE. The SDE is defined as: <span class="math display">\[dx = -\frac{1}{2}\beta(t)xdt + \sqrt{\beta(t)}dW_t\quad dW_t \sim \mathcal{N}(0, dt)\]</span> where <span class="math inline">\(\beta(t)\)</span> is a time-dependent function that controls the rate of noise addition over time.</p>
+<p>Since <span class="math inline">\(dW_t\)</span> follows a Gaussian distribution, we can discretize the SDE over small time intervals <span class="math inline">\(\Delta t\)</span> to obtain the following discrete-time update equation: <span class="math display">\[x_{t+\Delta t} = x_t - \frac{1}{2}\beta(t)\cdot x_t \cdot dt + \sqrt{\beta(t)\Delta t}\epsilon, \quad \epsilon \sim \mathcal{N}(0, I)\]</span> where <span class="math inline">\(\epsilon_t\)</span> is a standard Gaussian noise term.</p>
+<p>The following formula can be obtained from the Euler approximation and the Taylor expansion. <span id="eq-eq1"><span class="math display">\[
+x_i = \sqrt{1-\beta_i}x_{i-1} + \sqrt{\beta_i}\epsilon_{i-1}, \quad \epsilon_{i-1} \sim \mathcal{N}(0, I)
+\tag{1}\]</span></span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Euler-Maruyama and the Taylor expansion Method
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>pass</p>
+</div>
+</div>
+</div>
+<section id="forward-single-step-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="forward-single-step-diffusion-process">Forward single-step diffusion process</h3>
+<p>Let <span class="math inline">\(\beta = 1 - \alpha\)</span> in <a href="#eq-eq1" class="quarto-xref">Equation&nbsp;1</a>. We can then derive the formula for <span class="math inline">\(x_i\)</span> corresponding to a given <span class="math inline">\(x_{i-1}\)</span>. Since <span class="math inline">\(\alpha = [0.99999, \dots, 0.999]\)</span>, at each time step, <span class="math inline">\(x_{t-1}\)</span> is scaled by <span class="math inline">\(\sqrt{\alpha_t}\)</span> and some noise is added. Because the noise follows a Gaussian distribution, conditioned on <span class="math inline">\(x_{t-1}\)</span>, <span class="math inline">\(x_t\)</span> also follows a Gaussian distribution <span class="math inline">\(N\)</span>. Then, a random sample from the distribution of <span class="math inline">\(x_i\)</span> is used as the input for determining <span class="math inline">\(x_{t+1}\)</span>, and this process is iterated step by step. As a result, at each time step, <span class="math inline">\(x_t\)</span> moves closer to the origin. When <span class="math inline">\(T\)</span> is sufficiently large, i.e., there are enough time steps, the final <span class="math inline">\(x_i\)</span> follows a standard normal distribution: <span class="math inline">\(x_t \sim N(0,1)\)</span>. <span id="eq-eq2"><span class="math display">\[
+\left\{
+\begin{aligned}
+  x_t = \sqrt{\alpha_{t}} \cdot x_{t-1} + \sqrt{ 1- \alpha_{t}} \cdot \epsilon_{t-1} \\
+  p(x_t|x_{t-1}) \sim \mathcal{N}(\sqrt{\alpha_{t}} \cdot x_{t-1}, 1- \alpha_{t})
+\end{aligned}
+\right.
+\tag{2}\]</span></span> where <span class="math inline">\(\bar{\alpha}_t = \prod_{s=1}^{t} \alpha_s\)</span>.</p>
+<p><img src="figures/2015singlestep.png" class="img-fluid"></p>
+</section>
+<section id="multi-step-forward-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="multi-step-forward-diffusion-process">Multi-step forward diffusion process</h3>
+<p>By recursively applying the single-step diffusion process in <a href="#eq-eq2" class="quarto-xref">Equation&nbsp;2</a>, we can derive the multi-step forward diffusion process. Specifically, we can express <span class="math inline">\(x_t\)</span> directly in terms of the original data point <span class="math inline">\(x_0\)</span> and the accumulated noise over <span class="math inline">\(t\)</span> steps. This leads to the following equations: <span id="eq-eq3"><span class="math display">\[
+\left\{
+\begin{aligned}
+  x_t = \sqrt{\bar{\alpha}_{t}} \cdot x_0 + \sqrt{ 1- \bar{\alpha}_{t}} \cdot \epsilon_t \\
+  p(x_t|x_0) \sim \mathcal{N}(\sqrt{\bar{\alpha}_{t}} \cdot x_0, 1- \bar{\alpha}_{t})
+\end{aligned}
+\right.
+\tag{3}\]</span></span> where <span class="math inline">\(\bar{\alpha}_t = \prod_{s=1}^{t} \alpha_s\)</span>. <img src="figures/2015multistep.png" class="img-fluid"></p>
+</section>
+<section id="single-step-reverse-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="single-step-reverse-diffusion-process">Single-step reverse diffusion process</h3>
+<p>The reverse diffusion process aims to recover the original data point <span class="math inline">\(x_0\)</span> from the noisy observation <span class="math inline">\(x_t\)</span>. <a href="#eq-eq1" class="quarto-xref">Equation&nbsp;1</a> gives us the single-step forward diffusion process, but only in the very first step, that is, when <span class="math inline">\(x_0\)</span> is considered, <span class="math inline">\(x_{t-1}\)</span> is a deterministic value. However, in subsequent steps, <span class="math inline">\(x_{t-1}\)</span> is sampled from a probability distribution, and <span class="math inline">\(\epsilon\)</span> is also a stochastic value. The computation of <span class="math inline">\(x_t\)</span> involves combining these two uncertain values through scaling and addition. A single <span class="math inline">\(x_t\)</span> can correspond to infinitely many possible pairs of <span class="math inline">\(x_{i-t}\)</span> and <span class="math inline">\(\epsilon_t\)</span>. This means that the neural network would need to learn two uncertain values simultaneously, which is something the network cannot achieve.</p>
+<p>For <a href="#eq-eq2" class="quarto-xref">Equation&nbsp;2</a>, we can derive the reverse process as follows: <span class="math display">\[x_0 = \frac{x_t - \sqrt{1 - \bar{\alpha}_{t}}\epsilon_t}{\sqrt{\bar{\alpha}_{t}}}\]</span> Since <span class="math inline">\(\sqrt{\bar{\alpha}_{t}}\)</span> is nearly zero, our network does not have sufficent precision.</p>
+<p>However, if we know the starting point <span class="math inline">\(x_0\)</span> and the current point <span class="math inline">\(x_t\)</span>, the intermediate point <span class="math inline">\(x_{t-1}\)</span> becomes a completely determined Gaussian distribution. Its closed-form expression can be derived as follows: <span class="math display">\[q(x_{t-1}|x_t, x_0) = \mathcal{N}\left(x_{t-1};  \textcolor{red}{\tilde{\mu}_t(x_t, x_0)}, \textcolor{blue}{\tilde{\beta}_t I}\right)\]</span> where <span id="eq-eq4"><span class="math display">\[
+\begin{aligned}
+\textcolor{red}{\tilde{\mu}_t(x_t, x_0)} &amp;= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} x_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} x_0 \\
+&amp;= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} x_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} (\frac{x_t - \sqrt{1 - \bar{\alpha}}\epsilon_t}{\sqrt{\bar{\alpha}_t}}) \\
+&amp;= \textcolor{red}{\frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)} \\
+\end{aligned}
+\tag{4}\]</span></span> <span id="eq-eq5"><span class="math display">\[
+\textcolor{blue}{\tilde{\beta}_t} = \textcolor{blue}{\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \beta_t}
+\tag{5}\]</span></span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The derivation of <span class="math inline">\(\tilde{\mu}_t\)</span> and <span class="math inline">\(\tilde{\beta}_t\)</span>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+To derive the expressions for <span class="math inline">\(\tilde{\mu}_t\)</span> and <span class="math inline">\(\tilde{\beta}_t\)</span>, we can apply Bayes’ rule.
+<div style="font-size:0.8em; text-align: left">
+<span class="math display">\[\begin{aligned}
+q(x_{t-1}|x_t, x_0) &amp;= q(x_t|x_{t-1})\frac{q(x_{t-1}|x_0)}{q(x_{t}|x_0)} \\
+&amp;\propto \exp \Big(-\frac{1}{2}(\frac{\left(x_t - \sqrt{\alpha_t}x_{t-1}\right)^2}{\beta_t} + \frac{\left(x_{t-1} - \sqrt{\bar{\alpha}_{t-1}}x_0\right)^2}{1-\bar{\alpha}_{t-1}} - \frac{\left(x_t - \sqrt{\alpha_t}x_0\right)^2}{1 - \bar{\alpha}_t})\Big) \\
+&amp;= exp \Big(-\frac{1}{2} \Big( (\frac{\alpha_t}{\beta_t} + \frac{1}{1-\bar{\alpha}_{t-1}})x_{t-1}^2 - 2(\frac{\sqrt{\alpha_t}x_t}{\beta_t} + \frac{\sqrt{\bar{\alpha}_{t-1}}x_0}{1-\bar{\alpha}_{t-1}})x_{t-1} + C(x_t, x_0) \Big) \Big) \\
+
+\end{aligned}\]</span>
+</div>
+According the standard form of Gaussian distribution, we can identify the mean and variance as follows:
+<div style="font-size:0.8em; text-align: left">
+<p><span class="math display">\[
+\textcolor{red}{\tilde{\mu}_t(x_t, x_0)} = (\frac{\sqrt{\alpha_t}x_t}{\beta_t} + \frac{\sqrt{\bar{\alpha}_{t-1}}x_0}{1-\bar{\alpha}_{t-1}})/(\frac{\alpha_t}{\beta_t} + \frac{1}{1-\bar{\alpha}_{t-1}})\]</span></p>
+<p><span class="math display">\[
+\textcolor{blue}{\tilde{\beta}_t} = 1/(\frac{\alpha_t}{\beta_t} + \frac{1}{1-\bar{\alpha}_{t-1}}) = \textcolor{blue}{\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \beta_t}\]</span></p>
+</div>
+Based on the forward process formula <span class="math inline">\(x_t = \sqrt(\bar{\alpha}_{t})x_0 + \sqrt{1-\bar{\alpha}_{t}}\epsilon_t\)</span>, we can derive it as:
+<div style="font-size:0.8em; text-align: left">
+<p><span class="math display">\[
+x_0 = \frac{x_t-\sqrt{1-\bar{\alpha}_{t}}\epsilon}{\sqrt{\bar{\alpha}_{t}}}
+\]</span></p>
+</div>
+By substituting this <span class="math inline">\(x_0\)</span> into the formula for <span class="math inline">\(\tilde{\mu}_t\)</span> and simplifying, we get
+<div style="font-size:0.8em; text-align: left">
+<p><span class="math display">\[
+\textcolor{red}{\mu_t(x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1-\alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon(x_t, t) \right)}
+\]</span></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="ddpm-denoising-diffusion-probabilistic-models" class="level2">
+<h2 class="anchored" data-anchor-id="ddpm-denoising-diffusion-probabilistic-models">DDPM: Denoising Diffusion Probabilistic Models</h2>
+<section id="forward-diffusion-process" class="level3">
+<h3 class="anchored" data-anchor-id="forward-diffusion-process">Forward diffusion process</h3>
+<p>The forward diffusion process is essentially as Markov chain that gradually adds Gaussian noise to the data over a series of time steps until the data is completely transformed into pure random noise.</p>
+</section>
+<section id="single-step-noise-addition" class="level3">
+<h3 class="anchored" data-anchor-id="single-step-noise-addition">Single-step noise addition</h3>
+<p>Given a data point <span class="math inline">\(x_0 \sim q(x)\)</span> from the data distribution, the forward diffusion process adds noise in <span class="math inline">\(T\)</span> discrete time steps. At each time step <span class="math inline">\(t\)</span>, Gaussian noise is added to the data point according to a variance schedule <span class="math inline">\(\beta_t = (\beta_1, \beta_2, \ldots, \beta_T)\)</span>. The noise addition at each step can be described by the following equation: <span class="math display">\[q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)\]</span></p>
+<p>where <span class="math inline">\(\beta_t\)</span> is the variance schedule at time step <span class="math inline">\(t\)</span>,which means at each time step, how much Gaussian noise is added to the data point and normally is chosen to be a small positive value. Meanswhile, <span class="math inline">\(I\)</span> is the identity matrix, ensuring that the noise is isotropic (i.e., the same in all directions). Expected mean of <span class="math inline">\(x_t\)</span> is scaled version of <span class="math inline">\(x_{t-1}\)</span> by <span class="math inline">\(\sqrt{1-\beta_t}\)</span>, which ensures that as more noise is added, the original data point’s influence diminishes.</p>
+<p>If we use the reparameterization trick, we can directly express the relation between <span class="math inline">\(x_t\)</span> and <span class="math inline">\(x_{t-1}\)</span> and further more between <span class="math inline">\(x_t\)</span> and <span class="math inline">\(x_0\)</span>: <span class="math display">\[x_t = \sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}\epsilon_{t-1}, \quad \epsilon_{t-1} \sim \mathcal{N}(0, I)\]</span> <span class="math display">\[x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, \quad \epsilon \sim \mathcal{N}(0, I)\]</span> where <span class="math inline">\(\alpha_t = 1 - \beta_t\)</span> and <span class="math inline">\(\bar{\alpha}_t = \prod_{s=1}^{t} \alpha_s\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Conversion from a distribution to an equation (The Reparameterization)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In the paper <span class="citation" data-cites="ho2020denoising">Ho, Jain, and Abbeel (<a href="#ref-ho2020denoising" role="doc-biblioref">2020</a>)</span>, the authors define the forward diffusion process using a Gaussian distribution: <span class="math display">\[q(x_t|x_{t-1}) = \mathcal{N}(x_t; \underbrace{\sqrt{1-\beta_t}x_{t-1}}_{\text{mean}\,\mu}, \underbrace{\beta_t I}_{\text{variance}\,\sigma^2})\]</span> It means <span class="math inline">\(x_t \sim \mathcal{N}(\mu,\sigma^2)\)</span>, and any variable that follows a Gaussian distribution can be expressed as: <span class="math display">\[ X = \mu + \sigma \odot \epsilon, \quad \epsilon \sim \mathcal{N}(0, I) \]</span></p>
+<p>In our case, we have: <span class="math display">\[
+\mu = \sqrt{1-\beta_t}x_{t-1}, \quad \sigma = \sqrt{\beta_t}
+\]</span> Thus, we can rewrite the forward diffusion step as: <span class="math display">\[
+\begin{aligned}
+x_t = \mu + \sigma \odot \epsilon = \sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}\epsilon, \quad \epsilon \sim \mathcal{N}(0, \mathbf{I})
+\end{aligned}
+\]</span></p>
+<p>Otherwise, we can also express <span class="math inline">\(x_t\)</span> directly in terms of <span class="math inline">\(x_0\)</span>: <span class="math display">\[
+\begin{aligned}
+x_t &amp;= \sqrt{\alpha_t}x_{t-1} + \sqrt{1-\alpha_t}\epsilon_{t-1} \\
+&amp;= \sqrt{\alpha_t}(\sqrt{\alpha_{t-1}}x_{t-2} + \sqrt{1-\alpha_{t-1}}\epsilon_{t-2}) + \sqrt{1-\alpha_t}\epsilon_{t-1} \\
+&amp;= \sqrt{\alpha_t \alpha_{t-1}}x_{t-2} + \sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon_{t-2} + \sqrt{1-\alpha_t}\epsilon_{t-1} \\
+\end{aligned}
+\]</span></p>
+<p>Since <span class="math inline">\(\epsilon_{t-2}\)</span> and <span class="math inline">\(\epsilon_{t-1}\)</span> are both independent and identically distributed as <span class="math inline">\(\mathcal{N}(0, I)\)</span>, according to the additivity property of Gaussian distributions: <span class="math display">\[\mathcal{N}(\mu_1, \sigma_1^2) + \mathcal{N}(\mu_2, \sigma_2^2) = \mathcal{N}(\mu_1 + \mu_2, \sigma_1^2 + \sigma_2^2)\]</span> We can combine the noise terms: <span class="math display">\[
+\sqrt{\alpha_t(1-\alpha_{t-1})}\epsilon_{t-2} + \sqrt{1-\alpha_t}\epsilon_{t-1} \sim \mathcal{N}\left(0, \alpha_t(1-\alpha_{t-1})I + (1-\alpha_t)I\right) = \mathcal{N}\left(0, (1 - \alpha_t \alpha_{t-1})I\right)
+\]</span> Therefore: <span class="math display">\[
+\begin{aligned}
+x_t &amp;= \sqrt{\alpha_t \alpha_{t-1}}x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}}\bar{\epsilon}\\
+&amp;=\dots \\
+&amp;= \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, \quad \epsilon \sim \mathcal{N}(0, \mathbf{I}) \\
+\end{aligned}
+\]</span> where <span class="math inline">\(\alpha_t = 1 - \beta_t\)</span> and <span class="math inline">\(\bar{\alpha}_t = \prod_{s=1}^{t} \alpha_s\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What is reparameterization and Why use it?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In deep generative models, we often need to sample from a probability distribution that depends on some parameters. For example, in diffusion models, a neural network predicts the mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> of a Gaussian distribution at each time step, and then we need to sample a variable <span class="math inline">\(x_t\)</span> from <span class="math inline">\(\mathcal{N}(\mu, \sigma^2)\)</span>.</p>
+<p>However, sampling directly from this distribution can make it difficult to compute gradients with respect to the parameters during training. Suppose our neural network has parameters <span class="math inline">\(\theta\)</span>, and we want to compute the gradient of some loss function <span class="math inline">\(L\)</span> with respect to <span class="math inline">\(\theta\)</span>. If we sample <span class="math inline">\(x_t\)</span> directly from <span class="math inline">\(\mathcal{N}(\mu_\theta, \sigma^2_\theta)\)</span>, the sampling operation is not a function, which introduces randomness that breaks the gradient flow, making it impossible to compute <span class="math inline">\(\nabla_\theta L\)</span>. The fatal problem is that the sampling operation is not differentiable.</p>
+<p>The core idea of the reparameterization trick is to seperate the randomness from the parameters by expressing the random variable <span class="math inline">\(x_t\)</span> as a deterministic function of the parameters and an independent noise variable. For a Gaussian distribution, we can express the sampling operation as:<span class="math display">\[x_t = \mu_\theta + \sigma_\theta \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, 1)\]</span> Here, <span class="math inline">\(\epsilon \sim \mathcal{N}(0, 1)\)</span>, which is a random variable drawn from a standard normal distribution and independent of the parameters <span class="math inline">\(\theta\)</span>. This way, the randomness is isolated in <span class="math inline">\(\epsilon\)</span>, and the rest of the expression is a deterministic function of <span class="math inline">\(\theta\)</span>. It can be described by the following: <span class="math display">\[x_{t} = \mu_{\theta} + \sigma_{\theta} \odot \epsilon\]</span></p>
+<p>Now, we can sample <span class="math inline">\(x_t\)</span> by sampling <span class="math inline">\(\epsilon\)</span> from a fixed distribution (standard normal) and then applying the deterministic transformation. This allows us to compute gradients with respect to <span class="math inline">\(\theta\)</span> during backpropagation, as the sampling operation is now differentiable with respect to the parameters, which <span class="math inline">\(\nabla_\mu x_{t} = 1\)</span> and <span class="math inline">\(\nabla_\sigma x_{t} = \epsilon\)</span>.</p>
+<p>We also can compare two methods below in Pytorch:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> torch.tensor([<span class="fl">1.0</span>], requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> torch.tensor([<span class="fl">0.5</span>], requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Direct sampling (not differentiable)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>distribution <span class="op">=</span> torch.distributions.Normal(mu, sigma)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>x_direct <span class="op">=</span> distribution.sample()  <span class="co"># sample() for non-differentiable case</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># x_direct = distribution.rsample()  # rsample() for reparameterized case</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>loss_direct <span class="op">=</span> (x_direct <span class="op">-</span> <span class="fl">2.0</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># loss_direct.backward()  # This would fail to compute gradients, if using rsample(), it works</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Reparameterization trick (differentiable)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>epsilon <span class="op">=</span> torch.randn(<span class="dv">1</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>x_reparam <span class="op">=</span> mu <span class="op">+</span> sigma <span class="op">*</span> epsilon  <span class="co"># reparameterized sample</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>loss_reparam <span class="op">=</span> (x_reparam <span class="op">-</span> <span class="fl">2.0</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>loss_reparam.backward()  <span class="co"># This works</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mu.grad)  <span class="co"># Gradient with respect to mu</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sigma.grad)  <span class="co"># Gradient with respect to sigma</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<p>We can implement the forward process using PyTorch as follows:</p>
+<div id="e2a552a5" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_beta_schedule(timesteps, beta_start<span class="op">=</span><span class="fl">0.0001</span>, beta_end<span class="op">=</span><span class="fl">0.02</span>):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Create a linear beta schedule.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Parameters:</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">    timesteps: int</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">        The total number of time steps T.</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">    beta_start: float</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">        The starting value of beta.</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">    beta_end: float</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">        The ending value of beta.</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">    beta_schedule: np.array</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">        An array of beta values for each time step.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.linspace(beta_start, beta_end, timesteps)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="dv">300</span>  <span class="co"># Total diffusion steps</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>betas <span class="op">=</span> linear_beta_schedule(T) <span class="co"># Linear beta schedule</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>alphas <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> betas</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>alpha_bars <span class="op">=</span> np.cumprod(alphas, axis<span class="op">=</span><span class="dv">0</span>)  <span class="co"># Cumulative product of alphas</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward_diffusion_sample(x_0, t, noise<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">    Perform the forward diffusion process to obtain x_t from x_0.</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">    Parameters:</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">    x_0: torch.Tensor</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">        The original data point (batch_size, data_dim).</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">    t: int</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">        The time step at which to sample x_t.</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co">    noise: torch.Tensor or None</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">        Optional noise to add. If None, random noise will be generated.</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">    x_t: torch.Tensor</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">        The noised data point at time step t.</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> noise <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        noise <span class="op">=</span> torch.randn_like(x_0)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    sqrt_alpha_bar_t <span class="op">=</span> torch.sqrt(alpha_bars[t])[:, <span class="va">None</span>, <span class="va">None</span>, <span class="va">None</span>]  </span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    sqrt_one_minus_alpha_bar_t <span class="op">=</span> torch.sqrt(<span class="dv">1</span> <span class="op">-</span> alpha_bars[t])[:, <span class="va">None</span>, <span class="va">None</span>, <span class="va">None</span>] </span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    x_t <span class="op">=</span> sqrt_alpha_bar_t <span class="op">*</span> x_0 <span class="op">+</span> sqrt_one_minus_alpha_bar_t <span class="op">*</span> noise</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x_t</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="reverse-diffusion-process" class="level2">
+<h2 class="anchored" data-anchor-id="reverse-diffusion-process">Reverse diffusion process</h2>
+<p>In the process of forward diffusion, we defined how to gradually add Gaussian noise to the data using <span class="math inline">\(q(x_t|x_{t-1})\)</span>. The reverse diffusion process aims to reverse this noising process, gradually removing the noise to recover the original data from pure noise by using its reverse conditional distribution <span class="math inline">\(q(x_{t-1}|x_t)\)</span>. If we can accurately model this reverse process, we can start from random noise <span class="math inline">\(x_T \sim \mathcal{N}(0, I)\)</span> and iteratively sample <span class="math inline">\(x_{T-1}, x_{T-2}, \ldots, x_0\)</span> to generate new data samples that resemble the original data distribution.</p>
+<section id="can-we-directly-compute-the-reverse-conditional-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="can-we-directly-compute-the-reverse-conditional-distribution">Can we directly compute the reverse conditional distribution？</h3>
+<p>In theory, if we have access to the true data distribution and the forward process, we can compute the reverse conditional distribution <span class="math inline">\(q(x_{t-1}|x_t)\)</span> using Bayes’ theorem: <span class="math display">\[q(x_{t-1}|x_t) = \frac{q(x_t|x_{t-1})q(x_{t-1})}{q(x_t)}\]</span> However, in practice, this is infeasible for several reasons:</p>
+<ol type="1">
+<li><p><strong>Unknown Data Distribution</strong>: We typically do not have access to the true data distribution <span class="math inline">\(q(x - 1)\)</span>. The reason is that we only have a finite dataset of samples from the data distribution, not the distribution itself.</p></li>
+<li><p><strong>Intractable Integrals</strong>: The denominator <span class="math inline">\(q(x_t)\)</span> is referred to as the marginal distribution of <span class="math inline">\(x_t\)</span>. If we want to compute the probability at a specific time step <span class="math inline">\(t\)</span>, we need to integrate over all possible previous states <span class="math inline">\(x_{t-1}\)</span>: <span class="math display">\[q(x_t) = \int q(x_t|x_{t-1})q(x_{t-1})dx_{t-1}\]</span> This integral is often intractable, especially in high-dimensional spaces, which is called the “curse of dimensionality”.</p></li>
+</ol>
+<p>Due to these challenges, we cannot directly compute <span class="math inline">\(q(x_{t-1}|x_t)\)</span> and instead need to approximate it using a parameterized model, such as a neural network.</p>
+</section>
+<section id="using-a-neural-network-to-approximate-the-reverse-process" class="level3">
+<h3 class="anchored" data-anchor-id="using-a-neural-network-to-approximate-the-reverse-process">Using a neural network to approximate the reverse process</h3>
+<p>We can use a neural network with parameters <span class="math inline">\(\theta\)</span> to approximate the reverse conditional distribution. When the diffusion step size <span class="math inline">\(\beta_t\)</span> is sufficiently small, the reverse process <span class="math inline">\(q(x_{t-1} \mid x_t)\)</span> also follows a Gaussian distribution. Therefore, we can define the neural network outputs as the parameters of this Gaussian distribution: <span class="math display">\[
+p_\theta(x_{0:T}) = p(x_T) \prod_{t=1}^{T} p_\theta(x_{t-1}|x_t) \quad
+p_\theta(x_{t-1}|x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
+\]</span> where <span class="math inline">\(\mu_\theta(x_t, t)\)</span> and <span class="math inline">\(\Sigma_\theta(x_t, t)\)</span> are the mean and covariance predicted by the neural network for the reverse step from <span class="math inline">\(x_t\)</span> to <span class="math inline">\(x_{t-1}\)</span>.</p>
+<p>What is more, in the paper <span class="citation" data-cites="ho2020denoising">Ho, Jain, and Abbeel (<a href="#ref-ho2020denoising" role="doc-biblioref">2020</a>)</span>, the authors find that using a fixed covariance <span class="math inline">\(\Sigma_\theta(x_t, t) = \beta_t I\)</span> works well in practice, simplifying the model to only predict the mean <span class="math inline">\(\mu_\theta(x_t, t)\)</span>, which is the main focus of the training process.</p>
+<p>Now, we can train the neural network to learn the parameters <span class="math inline">\(\theta\)</span> such that the reverse process <span class="math inline">\(p_\theta(x_{t-1}|x_t)\)</span> closely approximates the true but unknow reverse conditional distribution <span class="math inline">\(q(x_{t-1}|x_t)\)</span>. To train the model, we aim to maximize the log-likelihood of the real data <span class="math inline">\(x_0\)</span> under the model, <span class="math inline">\(\log p_\theta(x_0)\)</span>. Because direct likelihood optimization is intractable, we resort to Jensen’s inequality and optimize the corresponding Evidence Lower Bound (ELBO): <span class="math display">\[- \log p_\theta(x_0) \le \mathbb{E}_{q} \left[ \log \frac{q(x_{1:T}|x_0)}{p_\theta(x_{0:T})} \right] = \text{ELBO}\]</span></p>
+<p>To convert each term in the equation to be analytically computable, the objective can be further rewritten to be a combination of several KL-divergence and entropy terms (See the detailed step-by-step process in <span class="citation" data-cites="sohldickstein2015deepunsupervisedlearningusing">J. Sohl-Dickstein et al. (<a href="#ref-sohldickstein2015deepunsupervisedlearningusing" role="doc-biblioref">2015</a>)</span>): <span class="math display">\[\small \text{ELBO} = \mathbb{E}_{q} \left[ \underbrace{D_{KL}(q(x_T|x_0) || p_\theta(x_T))}_{L_T}  + \sum_{t=2}^{T} \underbrace{D_{KL}(q(x_{t-1}|x_t, x_0) || p_\theta(x_{t-1}|x_t))}_{L_{t-1}} \underbrace{- \log p_\theta(x_0|x_1)}_{L_0} \right]\]</span> where <span class="math inline">\(D_{KL}(P||Q)\)</span> is the Kullback-Leibler divergence between two distributions <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>.</p>
+<p>Although the <span class="math inline">\(q(x_{t-1}|x_t)\)</span> is intractable, <span class="math inline">\(q(x_{t-1}|x_t, x_0)\)</span> is tractable because we condition on the original data point <span class="math inline">\(x_0\)</span>. While <span class="math inline">\(x_0\)</span> is unknown at inference time, it is available during training as part of the dataset. Following the <a href="#eq-eq4" class="quarto-xref">Equation&nbsp;4</a> and <a href="#eq-eq5" class="quarto-xref">Equation&nbsp;5</a>, we can derive the closed-form expression for <span class="math inline">\(q(x_{t-1}|x_t, x_0)\)</span> as a Gaussian distribution with mean <span class="math inline">\(\tilde{\mu}_t(x_t, x_0)\)</span> and variance <span class="math inline">\(\tilde{\beta}_t I\)</span>.</p>
+<p>Now, our current goal is to have the neural network <span class="math inline">\(p_\theta \sim \mathcal{N}\left(\mu_\theta,\Sigma_\theta\right)\)</span> approximate the true distribution <span class="math inline">\(q(x_{t-1}|x_t, x_0) \sim \mathcal{N}\left(\tilde{\mu}_t, \tilde{\beta}_t\right)\)</span>. Since the parameter <span class="math inline">\(\Sigma_\theta\)</span> is often fixed as <span class="math inline">\(\beta_t I\)</span>, we mainly focus on training the neural network to predict the mean <span class="math inline">\(\textcolor{red}{\mu_\theta}\)</span> to be as close as possible to the true mean <span class="math inline">\(\textcolor{red}{\tilde{\mu}_t = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)}\)</span>.</p>
+<p>The equation means that to accurately predict the mean <span class="math inline">\(\mu_\theta\)</span>, the neural network only needs to predict the noise <span class="math inline">\(\epsilon_\theta\)</span> present in the current image.</p>
+<p>This can be achieved by minimizing the KL-divergence between these two distributions:</p>
+<p><span class="math display">\[
+\begin{aligned}
+L_{t} &amp;= \mathbb{E}_{x_0,\epsilon} \left[D_{KL}(q(x_{t-1}|x_t, x_0) || p_\theta(x_{t-1}|x_t))\right]\\
+&amp;= \mathbb{E}_{x_0,\epsilon} \left[\frac{1}{2\|\Sigma_{\theta}(x_t,t)\|_2 ^ 2}\| \tilde{\mu}_t(x_t, x_0) - \mu_\theta(x_t, t) \|^2\right]\\
+&amp;= \mathbb{E}_{x_0,\epsilon} \left[\frac{1}{2\|\Sigma_{\theta}(x_t,t)\|_2 ^ 2}\| \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right) - \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t, t) \right) \|^{2}\right]\\
+&amp;= \mathbb{E}_{x_0,\epsilon} \left[\frac{(1-\alpha_t)^2}{2\alpha_t(1-\bar{\alpha}_t)\| \Sigma_\theta \|_2^2}
+\left\lVert
+\epsilon_t - \epsilon_\theta(x_t,t)
+\right\rVert^2
+\right] \\
+&amp;= \mathbb{E}_{x_0,\epsilon}
+\left[
+\frac{(1-\alpha_t)^2}
+{2\alpha_t(1-\bar{\alpha}_t)\left\lVert \Sigma_\theta \right\rVert _2^2}
+\left\lVert
+\epsilon_t -
+\epsilon_\theta\!\left(
+\sqrt{\bar{\alpha}_t} x_0 +
+\sqrt{1-\bar{\alpha}_t}\,\epsilon_t,
+t
+\right)
+\right\rVert^2
+\right]
+\end{aligned}
+\]</span></p>
+<p><span class="citation" data-cites="ho2020denoising">Ho, Jain, and Abbeel (<a href="#ref-ho2020denoising" role="doc-biblioref">2020</a>)</span> further simplifies the loss function by removing the weighting term, leading to a more straightforward objective:</p>
+<p><span class="math display">\[
+\boxed {\textcolor{red}{L_t^{simple} = \mathbb{E}_{x_0,\epsilon,t} \left[\left\lVert \epsilon_t - \epsilon_\theta(x_t,t) \right\rVert^2\right]}}
+\]</span></p>
+<p>The final training objective is:</p>
+<p><span class="math display">\[
+L_{simple} = L_t^{simple} + C
+\]</span></p>
+<p>where <span class="math inline">\(C\)</span> is a constant that does not depend on the model parameters <span class="math inline">\(\theta\)</span> and can be ignored during optimization.</p>
+<p><img src="figures/DDPM-algo.png" class="img-fluid"></p>
+</section>
+<section id="sampling-from-the-trained-model" class="level3">
+<h3 class="anchored" data-anchor-id="sampling-from-the-trained-model">Sampling from the trained model</h3>
+<p>Once the neural network which can predict the noise <span class="math inline">\(\epsilon_\theta(x_t, t)\)</span> is trained, we can use it to sample new data points by reversing the diffusion process. Starting from pure Gaussian noise <span class="math inline">\(x_T \sim \mathcal{N}(0, I)\)</span>, we iteratively apply the reverse diffusion steps using the learned model.</p>
+<p><span class="math display">\[
+x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t, t) \right) + \sigma_t z
+\]</span></p>
+<p>where <span class="math inline">\(z \sim \mathcal{N}(0, I)\)</span> is random noise added at each step to maintain stochasticity, and <span class="math inline">\(\sigma_t\)</span> is a scaling factor that can be adjusted based on the desired level of noise during sampling.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why we need to add <span class="math inline">\(\sigma_t z\)</span>？
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This term corresponds to Langevin dynamics. Without it, the sampling process becomes a deterministic numerical procedure, which often leads to overly smooth images with a lack of fine details. Introducing stochastic perturbations helps correct estimation errors at each step and enables the generative model to better explore the true image manifold.</p>
+</div>
+</div>
+</section>
+<section id="how-to-train-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-train-the-model">How to train the model</h3>
+<p>We get the simplified loss function as follows:</p>
+<p><span class="math display">\[
+L_{simple} = \left\|\epsilon_t - \epsilon_\theta(x_t,t) \right\|^2
+\]</span></p>
+<p>This means that the training procedure consists of only four steps:</p>
+<ol type="1">
+<li><p><strong>Random sampling</strong>: Randomly sample a data point <span class="math inline">\(x_0\)</span> from the training dataset.</p></li>
+<li><p><strong>Random timestep</strong>: Select a random time step $ t $.</p></li>
+<li><p><strong>Add noise in the forward process</strong>: Generate a noisy version of the data point <span class="math inline">\(x_t\)</span> using the forward diffusion equation:</p>
+<p><span class="math display">\[ x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon_t, \quad \epsilon_t \sim \mathcal{N}(0, I)\]</span></p></li>
+<li><p><strong>Train the model</strong>: Use the noisy image <span class="math inline">\(x_t\)</span> and the corresponding noise <span class="math inline">\(\epsilon_t\)</span> to train the neural network <span class="math inline">\(\epsilon_\theta(x_t, t)\)</span> to predict the noise.</p></li>
+<li><p><strong>Loss computation</strong>: Compute the loss using the simplified loss function:</p>
+<p><span class="math display">\[ L_{simple} = \left\|\epsilon_t - \epsilon_\theta(x_t,t) \right\|^2 \]</span></p></li>
+</ol>
+
+
+
+
+</section>
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-ho2020denoising" class="csl-entry" role="listitem">
+Ho, Jonathan, Ajay Jain, and Pieter Abbeel. 2020. <span>“Denoising Diffusion Probabilistic Models.”</span> <em>arXiv Preprint arXiv:2006.11239</em>.
+</div>
+<div id="ref-SohlDickstein2015DeepUL" class="csl-entry" role="listitem">
+Sohl-Dickstein, Jascha Narain, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 2015. <span>“Deep Unsupervised Learning Using Nonequilibrium Thermodynamics.”</span> <em>ArXiv</em> abs/1503.03585. <a href="https://api.semanticscholar.org/CorpusID:14888175">https://api.semanticscholar.org/CorpusID:14888175</a>.
+</div>
+<div id="ref-sohldickstein2015deepunsupervisedlearningusing" class="csl-entry" role="listitem">
+Sohl-Dickstein, Jascha, Eric A. Weiss, Niru Maheswaranathan, and Surya Ganguli. 2015. <span>“Deep Unsupervised Learning Using Nonequilibrium Thermodynamics.”</span> <a href="https://arxiv.org/abs/1503.03585">https://arxiv.org/abs/1503.03585</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/your-website-url\.example\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
