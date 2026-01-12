@@ -5,7 +5,7 @@ website:
   description: "A blog built with Quarto"
   site-url: https://sunhk7.github.io/ # you must change this appropriately for RSS feeds to work properly
   repo-url: "https://github.com/Anima7pro/sunhk7.github.io"
-  title: "my-tech-notebook"
+  title: "Machine Learning and AI Notes"
   navbar:
     right:
       - about.qmd

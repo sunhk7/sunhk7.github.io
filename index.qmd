@@ -1,5 +1,5 @@
 ---
-title: "my-tech-notebook"
+title: "AI Notes"
 listing:
   contents: posts
   feed: true
