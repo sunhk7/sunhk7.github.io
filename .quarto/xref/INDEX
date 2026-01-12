@@ -1,5 +1,11 @@
 {
   "posts/diffusion-model/index.ipynb": {
     "index.html": "5e95d005"
+  },
+  "index.qmd": {
+    "index.html": "b1a11260"
+  },
+  "about.qmd": {
+    "about.html": "80d7abb9"
   }
 }

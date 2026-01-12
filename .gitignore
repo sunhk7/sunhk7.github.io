@@ -1,2 +1,31 @@
-/.quarto/
+# Quarto build output
 /_site/
+/_book/
+/docs/
+
+# Quarto cache
+/.quarto/
+/.quarto-cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+**/*.quarto_ipynb
